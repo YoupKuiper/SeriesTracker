@@ -18,5 +18,5 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: SeriesTrackerStack
-          template: cloudformation.yaml
+          template: ./cloudformation.yaml
           no-fail-on-empty-changeset: "1"
