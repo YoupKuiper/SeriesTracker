@@ -17,6 +17,6 @@ jobs:
         id: seriestracker
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: ${{ steps.env-name.outputs.environment }}
+          name: SeriesTrackerStack
           template: cloudformation.yaml
           no-fail-on-empty-changeset: "1"
