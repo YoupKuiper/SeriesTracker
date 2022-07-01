@@ -6,6 +6,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          path: main
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v1
@@ -13,13 +17,10 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'eu-west-1'
-      - name: Check PlatformIO
-        run: |
-          ls
       - name: Deploy with CloudFormation
         id: seriestracker
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: SeriesTrackerStack
-          template: file://cloudformation.yaml
+          template: cloudformation.yaml
           no-fail-on-empty-changeset: "1"
