@@ -1,5 +1,10 @@
 name: deploy to aws
 on: [push]
+inputs:
+  region:
+    description: 'AWS Region'
+    required: true
+    default: 'eu-west-1'
 jobs:
   deploy_source:
     name: build and deploy aws infra
@@ -17,7 +22,7 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: ${{ steps.env-name.outputs.environment }}
-          template: stack.yaml
+          template: cloudformation.yaml
           no-fail-on-empty-changeset: "1"
           parameter-overrides: >-
             Name=${{ steps.env-name.outputs.environment }},

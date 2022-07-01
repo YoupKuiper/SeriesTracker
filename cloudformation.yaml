@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploying SeriesTracker infrastructure
+Outputs:
+  LambdaRoleARN:
+    Description: Role for SeriesTrackerLambda execution.
+    Value:
+      Fn::GetAtt:
+        - LambdaRole
+        - Arn
+    Export:
+      Name:
+        Fn::Sub: LambdaRole
+  LambdaFunctionName:
+    Value:
+      Ref: LambdaFunction
+  LambdaFunctionARN:
+    Description: Lambda function ARN.
+    Value:
+      Fn::GetAtt:
+        - LambdaFunction
+        - Arn
+    Export:
+      Name: LambdaFunctionARN
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: lambda-role
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action:
+            - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+              - lambda.amazonaws.com
+        Version: 2012-10-17
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+      Path: /
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: SeriesTrackerLambda
+      Description: SeriesTracker Lambda Function
+      Runtime: nodejs16.x
+      Code:
+        ZipFile:
+          "exports.handler = function(event, context){\n
+            var sample = sample;"
+      Handler: handler.js
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaRole
+          - Arn
