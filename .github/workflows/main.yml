@@ -1,14 +1,19 @@
 name: deploy to aws
-on: [push]
-inputs:
-  region:
-    description: 'AWS Region'
-    required: true
-    default: 'eu-west-1'
+on: 
+  push:
+    branches:
+      - main
+  workflow_call:
+    inputs:
+      region:
+        description: 'AWS Region'
+        required: true
+        default: 'eu-west-1'
 jobs:
   deploy_source:
     name: build and deploy aws infra
     runs-on: ubuntu-latest
+
     steps:
       - name: Configure AWS credentials
         id: creds
