@@ -6,10 +6,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-        with:
-          path: main
+      - uses: actions/checkout@v2
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v1
@@ -18,8 +15,8 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: 'eu-west-1'
       - name: Deploy with CloudFormation
-        id: seriestracker
         uses: aws-actions/aws-cloudformation-github-deploy@v1
+        id: seriestracker
         with:
           name: SeriesTrackerStack
           template: cloudformation.yaml
