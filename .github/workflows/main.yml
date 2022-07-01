@@ -1,15 +1,5 @@
 name: deploy to aws
-on: 
-  push:
-    branches:
-      - main
-  workflow_call:
-    inputs:
-      region:
-        description: 'AWS Region'
-        type: string
-        required: false
-        default: 'eu-west-1'
+on: [push]
 jobs:
   deploy_source:
     name: build and deploy aws infra
@@ -22,7 +12,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ inputs.region }}
+          aws-region: 'eu-west-1'
       - name: Deploy to Amplify Console with CloudFormation
         id: seriest
         uses: aws-actions/aws-cloudformation-github-deploy@v1
