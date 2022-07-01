@@ -1,0 +1,27 @@
+name: deploy to aws
+on: [push]
+jobs:
+  deploy_source:
+    name: build and deploy aws infra
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ github.event.inputs.region }}
+      - name: Deploy to Amplify Console with CloudFormation
+        id: seriest
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ${{ steps.env-name.outputs.environment }}
+          template: stack.yaml
+          no-fail-on-empty-changeset: "1"
+          parameter-overrides: >-
+            Name=${{ steps.env-name.outputs.environment }},
+            Repository=https://github.com/${{ github.repository }},
+            OauthToken=${{ secrets.AMPLIFY_TOKEN }},
+            Domain=${{ secrets.AMPLIFY_DOMAIN }}
+          
