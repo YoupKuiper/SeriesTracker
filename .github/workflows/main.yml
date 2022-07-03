@@ -19,7 +19,7 @@ jobs:
         run: mv node_modules dist/node_modules
 
       - name: Create Lambda Zip file
-        run: (cd dist && zip -r ../function.zip .)
+        run: (cd dist && zip -r ../SeriesTrackerCode.zip .)
 
       - name: Configure AWS credentials
         id: creds
