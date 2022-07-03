@@ -47,9 +47,7 @@ Resources:
       Description: SeriesTracker Lambda Function
       Runtime: nodejs16.x
       Code:
-        ZipFile:
-          "exports.handler = function(event, context){\n
-            var sample = sample;"
+        ZipFile: SeriesTrackerCode.zip
       Handler: handler.js
       MemorySize: 128
       Timeout: 10

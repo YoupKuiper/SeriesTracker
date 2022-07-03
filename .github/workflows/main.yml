@@ -6,7 +6,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Move node_modules to dist
+        run: mv node_modules dist/node_modules
+
+      - name: Create Lambda Zip file
+        run: (cd dist && zip -r ../function.zip .)
+
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v1
