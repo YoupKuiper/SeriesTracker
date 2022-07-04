@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CODE_ZIPFILE_NAME: SeriesTrackerCode
+      CODE_ZIPFILE_NAME: SeriesTrackerCode.zip
       AWS_REGION: eu-west-1
     steps:
       - name: Checkout Code
@@ -47,4 +47,5 @@ jobs:
           capabilities: "CAPABILITY_NAMED_IAM"
           parameter-overrides: >-
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }},
-            CodeZipFileName=SeriesTrackerCode.zip
+            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }},
+            TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }}
