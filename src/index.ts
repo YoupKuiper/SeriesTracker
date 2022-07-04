@@ -33,7 +33,7 @@ export const handler = async (event: any, context: any)=> {
         // Send emails for every tracked series thats airing today
         var params = {
             Destination: {
-              ToAddresses: ["youp_feyenoord@hotmail.com"],
+              ToAddresses: [process.env.VERIFIED_EMAIL_ADDRESS],
             },
             Message: {
               Body: {
@@ -42,7 +42,7 @@ export const handler = async (event: any, context: any)=> {
         
               Subject: { Data: "Test Email" },
             },
-            Source: "youp_feyenoord@hotmail.com",
+            Source: process.env.VERIFIED_EMAIL_ADDRESS,
           };
          
           return ses.sendEmail(params).promise()
@@ -50,8 +50,6 @@ export const handler = async (event: any, context: any)=> {
       } catch (error) {
         console.error(error);
       }
-
-    // Call SNS To send Email?
 
     return {
         statusCode: 200,

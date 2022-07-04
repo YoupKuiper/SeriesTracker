@@ -10,6 +10,9 @@ Parameters:
   TheMovieDbToken:
     Type: String
     Description: Token for calling the movie db api
+  VerifiedEmailAddress:
+    Type: String
+    Description: Email address used to send emails
 Outputs:
   LambdaRoleARN:
     Description: Role for SeriesTrackerLambda execution.
@@ -63,6 +66,7 @@ Resources:
       Environment:
         Variables:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+          VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
       Handler: index.handler
       MemorySize: 128
       Timeout: 10

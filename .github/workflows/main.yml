@@ -48,5 +48,6 @@ jobs:
           capabilities: "CAPABILITY_NAMED_IAM"
           parameter-overrides: >-
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }},
-            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }},
-            TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }}
+            TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }},
+            VerifiedEmailAddress=${{ secrets.VERIFIED_EMAIL_ADDRESS }},
+            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }}
