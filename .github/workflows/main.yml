@@ -48,4 +48,4 @@ jobs:
           capabilities: "CAPABILITY_NAMED_IAM"
           parameter-overrides: >-
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }}
-            CodeZipFileName=${{ CODE_ZIPFILE_NAME }}.zip
+            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }}.zip
