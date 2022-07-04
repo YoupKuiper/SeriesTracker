@@ -23,6 +23,9 @@ jobs:
       - name: Create Lambda Zip file
         run: (cd dist && zip -r ../SeriesTrackerCode.zip .)
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v1
