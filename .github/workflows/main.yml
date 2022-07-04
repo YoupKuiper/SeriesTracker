@@ -33,8 +33,7 @@ jobs:
 
       - name: Copy lambda code to s3 bucket
         run: |
-          ls
-          aws s3 sync ./SeriesTrackerCode.zip s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
+          aws s3 sync SeriesTrackerCode.zip s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
 
       - name: Deploy with CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
