@@ -7,6 +7,7 @@ jobs:
 
     env:
       CodeZipFileName: SeriesTrackerCode
+      AwsRegion: eu-west-1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -22,7 +23,7 @@ jobs:
 
       - name: Create Lambda Zip file
         run: |
-          zip -r dist/SeriesTrackerCode.zip .
+          (cd dist && zip -r ../SeriesTrackerCode.zip .)
 
       - name: Configure AWS credentials
         id: creds
@@ -30,11 +31,11 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: 'eu-west-1'
+          aws-region: $AwsRegion
 
       - name: Copy lambda code to s3 bucket
         run: |
-          aws s3 sync dist/SeriesTrackerCode.zip s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
+          aws s3 sync . s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
 
       - name: Deploy with CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -47,3 +48,6 @@ jobs:
           parameter-overrides: >-
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }}
             CodeZipFileName=$CodeZipFileName.zip
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
