@@ -7,10 +7,7 @@ export const handler = async (event: any, context: any)=> {
     // Call movieDB to get todays airing series
 
     try {
-        const response = await axios.get('https://api.themoviedb.org/3/tv/airing_today?&language=en-US&page=1',
-        {
-            headers: {'Authorization': process.env.THE_MOVIE_DB_TOKEN},
-        });
+        const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=1`);
         console.log(response);
       } catch (error) {
         console.error(error);
