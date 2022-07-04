@@ -46,5 +46,5 @@ jobs:
           no-fail-on-empty-changeset: "1"
           capabilities: "CAPABILITY_NAMED_IAM"
           parameter-overrides: >-
-            ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }}
+            ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }},
             CodeZipFileName=SeriesTrackerCode.zip
