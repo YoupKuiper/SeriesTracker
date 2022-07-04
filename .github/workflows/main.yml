@@ -35,6 +35,7 @@ jobs:
 
       - name: Copy lambda code to s3 bucket
         run: |
+          ls
           aws s3 cp ${{ env.CODE_ZIPFILE_NAME }} s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
 
       - name: Deploy with CloudFormation
