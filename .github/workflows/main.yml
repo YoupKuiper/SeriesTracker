@@ -21,10 +21,9 @@ jobs:
         run: mv node_modules dist/node_modules
 
       - name: Create Lambda Zip file
-        run: (cd dist && zip -r ../SeriesTrackerCode.zip .)
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+        run: |
+          (cd dist && zip -r ../SeriesTrackerCode.zip .)
+          cd ..
 
       - name: Configure AWS credentials
         id: creds
