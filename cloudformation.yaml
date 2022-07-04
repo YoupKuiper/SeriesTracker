@@ -48,6 +48,7 @@ Resources:
         Version: 2012-10-17
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSLambdaExecute
+        - arn:aws:iam::aws:policy/AmazonSESFullAccess
       Path: /
   LambdaFunction:
     Type: AWS::Lambda::Function
