@@ -22,8 +22,7 @@ jobs:
 
       - name: Create Lambda Zip file
         run: |
-          (cd dist && zip -r ../SeriesTrackerCode.zip .)
-          cd ..
+          zip -r dist/SeriesTrackerCode.zip .
 
       - name: Configure AWS credentials
         id: creds
@@ -35,7 +34,7 @@ jobs:
 
       - name: Copy lambda code to s3 bucket
         run: |
-          aws s3 sync . s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
+          aws s3 sync dist/SeriesTrackerCode.zip s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
 
       - name: Deploy with CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
