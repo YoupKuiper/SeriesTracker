@@ -55,7 +55,7 @@ Resources:
       Runtime: nodejs16.x
       Code:
         S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Sub ${CodeZipFileName}.zip
+        S3Key: SeriesTrackerCode.zip
       Handler: handler.js
       MemorySize: 128
       Timeout: 10
