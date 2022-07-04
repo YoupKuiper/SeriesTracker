@@ -33,7 +33,7 @@ export const handler = async (event: any, context: any)=> {
         // Send emails for every tracked series thats airing today
         var params = {
             Destination: {
-              ToAddresses: ["hansklok@endtest-mail.io"],
+              ToAddresses: ["youp_feyenoord@hotmail.com"],
             },
             Message: {
               Body: {
@@ -42,7 +42,7 @@ export const handler = async (event: any, context: any)=> {
         
               Subject: { Data: "Test Email" },
             },
-            Source: "SeriesTrackerApplicationEmailAddress@gmail.com",
+            Source: "youp_feyenoord@hotmail.com",
           };
          
           return ses.sendEmail(params).promise()
