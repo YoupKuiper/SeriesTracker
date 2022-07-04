@@ -1,20 +1,18 @@
 {
   "compilerOptions": {
-    "allowJs": true,
-    "checkJs": false,
-    "resolveJsonModule": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "lib": ["es6", "es7", "dom", "esnext"],
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "noEmit": false,
-    "noImplicitAny": false,
+    "target": "es2020",
+    "strict": true,
+    "preserveConstEnums": true,
+    "noEmit": true,
+    "sourceMap": false,
+    "module":"commonjs",
+    "moduleResolution":"node",
+    "esModuleInterop": true, 
+    "skipLibCheck": true,
     "outDir": "dist",
-    "removeComments": true,
-    "target": "es2017",
-    "rootDirs": ["src/", "config/"],
-    "typeRoots": ["./node_modules/@types", "./typings"]
+    "forceConsistentCasingInFileNames": true, 
+    "isolatedModules": true, 
+    "rootDirs": ["src/", "config/"]
   },
   "include": ["src/**/*", "./typings"],
   "exclude": ["node_modules", "bin", "**/__mocks__*", "**/*.spec.**", "test", "assets"]
