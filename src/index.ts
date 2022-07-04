@@ -45,7 +45,8 @@ export const handler = async (event: any, context: any)=> {
             Source: process.env.VERIFIED_EMAIL_ADDRESS,
           };
          
-          return ses.sendEmail(params).promise()
+          const sendEmailResponse = await ses.sendEmail(params).promise()
+          console.log(sendEmailResponse)
 
       } catch (error) {
         console.error(error);
