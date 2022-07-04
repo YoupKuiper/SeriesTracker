@@ -23,7 +23,7 @@ jobs:
 
       - name: Create Lambda Zip file
         run: |
-          (cd dist && zip -r ../{{ env.CODE_ZIPFILE_NAMESeriesTrackerCode }}.zip .)
+          (cd dist && zip -r "../{{ env.CODE_ZIPFILE_NAME }}.zip" .)
 
       - name: Configure AWS credentials
         id: creds
@@ -35,7 +35,7 @@ jobs:
 
       - name: Copy lambda code to s3 bucket
         run: |
-          aws s3 cp {{ env.CODE_ZIPFILE_NAMESeriesTrackerCode }}.zip s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
+          aws s3 cp "{{ env.CODE_ZIPFILE_NAME }}.zip" s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
 
       - name: Deploy with CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -47,4 +47,4 @@ jobs:
           capabilities: "CAPABILITY_NAMED_IAM"
           parameter-overrides: >-
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }}
-            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }}.zip
+            CodeZipFileName="${{ env.CODE_ZIPFILE_NAME }}.zip"
