@@ -6,8 +6,8 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CodeZipFileName: SeriesTrackerCode
-      AwsRegion: eu-west-1
+      CODE_ZIPFILE_NAME: SeriesTrackerCode
+      AWS_REGION: eu-west-1
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -24,6 +24,7 @@ jobs:
       - name: Create Lambda Zip file
         run: |
           (cd dist && zip -r ../SeriesTrackerCode.zip .)
+          ls
 
       - name: Configure AWS credentials
         id: creds
@@ -31,7 +32,7 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: $AwsRegion
+          aws-region: "$AWS_REGION"
 
       - name: Copy lambda code to s3 bucket
         run: |
@@ -47,7 +48,4 @@ jobs:
           capabilities: "CAPABILITY_NAMED_IAM"
           parameter-overrides: >-
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }}
-            CodeZipFileName=$CodeZipFileName.zip
-
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+            CodeZipFileName="$CODE_ZIPFILE_NAME.zip"
