@@ -15,21 +15,25 @@ export const handler = async (event: any, context: any)=> {
 
         let promises = [];
 
-        console.log('Total pages of series airing today: ' + response.data.total_pages)
+        console.log(`Total pages of series airing today: ${response.data.total_pages}`)
 
         for (let pageNumber = 1; pageNumber < response.data.total_pages+1; pageNumber++){
-            promises.push(getSeriesForPage(pageNumber))
+            promises.push(getSeriesFor(pageNumber))
         }
 
         const allSeriesAiringTodayPaged = await Promise.all(promises);
         const allSeriesAiringToday = Array.prototype.concat.apply([], allSeriesAiringTodayPaged);
 
-        const interestingSeriesAiringToday = allSeriesAiringToday.filter(series => {
+        const trackedSeriesAiringToday = allSeriesAiringToday.filter(series => {
             return seriesToTrack.includes(series.id)
         })
         
-        console.log(interestingSeriesAiringToday)
+        console.log(`Tracked series found: ${JSON.stringify(trackedSeriesAiringToday)}`)
 
+        let trackedSeriesNames = '';
+        for (let [index, series] of trackedSeriesAiringToday.entries()) {
+          trackedSeriesNames = index === trackedSeriesAiringToday.length - 1 ? `${series.name.toUpperCase()}` : `${series.name.toUpperCase()}, `
+        }
         // Send emails for every tracked series thats airing today
         var params = {
             Destination: {
@@ -37,10 +41,10 @@ export const handler = async (event: any, context: any)=> {
             },
             Message: {
               Body: {
-                Text: { Data: "Test" },
+                Text: { Data: `Maybe posters will be shown in this email at some point` },
               },
         
-              Subject: { Data: "Test Email" },
+              Subject: { Data: `Airing today: ${trackedSeriesNames}` },
             },
             Source: process.env.VERIFIED_EMAIL_ADDRESS,
           };
@@ -61,7 +65,7 @@ export const handler = async (event: any, context: any)=> {
 };
 
 
-const getSeriesForPage = async (pageNumber: number) => {
+const getSeriesFor = async (pageNumber: number) => {
     const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=${pageNumber}`)
     return response.data.results;
 }
