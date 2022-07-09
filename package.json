@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "local": "ts-node ./local/testHandler.ts",
+    "local": "ts-node ./local/testHandlerLocal.ts",
     "build": "tsc"
   },
   "keywords": [],
@@ -17,6 +17,7 @@
     "express": "^4.18.1"
   },
   "devDependencies": {
-    "@types/node": "^18.0.1"
+    "@types/node": "^18.0.1",
+    "aws-sdk": "^2.1171.0"
   }
 }

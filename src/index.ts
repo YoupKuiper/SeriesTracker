@@ -1,6 +1,7 @@
 const axios = require('axios').default;
-var aws = require("aws-sdk");
-var ses = new aws.SES({ region: process.env.AWS_REGION });
+import aws from "aws-sdk";
+const ses = new aws.SES({ region: process.env.AWS_REGION });
+
 
 export const handler = async (event: any, context: any)=> {
     console.log(`Event: ${JSON.stringify(event, null, 2)}`);
@@ -37,7 +38,7 @@ export const handler = async (event: any, context: any)=> {
         // Send emails for every tracked TVShow thats airing today
         var params = {
             Destination: {
-              ToAddresses: [process.env.VERIFIED_EMAIL_ADDRESS],
+              ToAddresses: [process.env.VERIFIED_EMAIL_ADDRESS || ''],
             },
             Message: {
               Body: {
@@ -46,7 +47,7 @@ export const handler = async (event: any, context: any)=> {
         
               Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
             },
-            Source: process.env.VERIFIED_EMAIL_ADDRESS,
+            Source: process.env.VERIFIED_EMAIL_ADDRESS || '',
           };
          
           const sendEmailResponse = await ses.sendEmail(params).promise()
