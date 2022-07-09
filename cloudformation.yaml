@@ -18,11 +18,11 @@ Outputs:
     Description: Role for TVShowsTrackerLambda execution.
     Value:
       Fn::GetAtt:
-        - LambdaRole
+        - LambdaIAMRole
         - Arn
     Export:
       Name:
-        Fn::Sub: LambdaRole
+        Fn::Sub: LambdaIAMRole
   LambdaFunctionName:
     Value:
       Ref: LambdaFunction
@@ -35,7 +35,7 @@ Outputs:
     Export:
       Name: LambdaFunctionARN
 Resources:
-  LambdaRole:
+  LambdaIAMRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName:
