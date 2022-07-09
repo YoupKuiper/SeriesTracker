@@ -72,7 +72,7 @@ Resources:
       Timeout: 10
       Role:
         Fn::GetAtt:
-          - LambdaRole
+          - LambdaIAMRole
           - Arn
   ScheduledRule: 
     Type: AWS::Events::Rule
