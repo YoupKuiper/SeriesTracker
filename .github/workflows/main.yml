@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      CODE_ZIPFILE_NAME: SeriesTrackerCode-${{ github.run_id }}-${{ github.run_attempt }}.zip
+      CODE_ZIPFILE_NAME: TVShowsTrackerCode-${{ github.run_id }}-${{ github.run_attempt }}.zip
       AWS_REGION: eu-west-1
     steps:
       - name: Checkout Code
@@ -40,9 +40,9 @@ jobs:
 
       - name: Deploy with CloudFormation
         uses: aws-actions/aws-cloudformation-github-deploy@v1
-        id: seriestracker
+        id: TVShowsTracker
         with:
-          name: SeriesTrackerStack
+          name: TVShowsTrackerStack
           template: cloudformation.yaml
           no-fail-on-empty-changeset: "1"
           capabilities: "CAPABILITY_NAMED_IAM"

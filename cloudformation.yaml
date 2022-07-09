@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Deploying SeriesTracker infrastructure
+Description: Deploying TVShowsTracker infrastructure
 Parameters:
   ArtifactBucketName:
     Type: String
@@ -15,7 +15,7 @@ Parameters:
     Description: Email address used to send emails
 Outputs:
   LambdaRoleARN:
-    Description: Role for SeriesTrackerLambda execution.
+    Description: Role for TVShowsTrackerLambda execution.
     Value:
       Fn::GetAtt:
         - LambdaRole
@@ -57,8 +57,8 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName:
-        Fn::Sub: SeriesTrackerLambda
-      Description: SeriesTracker Lambda Function
+        Fn::Sub: TVShowsTrackerLambda
+      Description: TVShowsTracker Lambda Function
       Runtime: nodejs16.x
       Code:
         S3Bucket: !Ref ArtifactBucketName
