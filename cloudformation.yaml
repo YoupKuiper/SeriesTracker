@@ -16,27 +16,7 @@ Parameters:
   UserTableName:
     Type: String
     Description: Name of DynamoDB table that holds user data
-Outputs:
-  LambdaRoleARN:
-    Description: Role for TVShowsTrackerLambda execution.
-    Value:
-      Fn::GetAtt:
-        - LambdaIAMRole
-        - Arn
-    Export:
-      Name:
-        Fn::Sub: LambdaIAMRole
-  LambdaFunctionName:
-    Value:
-      Ref: EmailNotificationsLambda
-  LambdaFunctionARN:
-    Description: Lambda function ARN.
-    Value:
-      Fn::GetAtt:
-        - EmailNotificationsLambda
-        - Arn
-    Export:
-      Name: LambdaFunctionARN
+
 Resources:
 
   ## IAM ROLES
@@ -201,14 +181,14 @@ Resources:
         - 
           Arn: 
             Fn::GetAtt: 
-              - "LambdaFunction"
+              - "EmailNotificationsLambda"
               - "Arn"
           Id: "TargetFunctionV1"
   PermissionForEventsToInvokeLambda: 
     Type: AWS::Lambda::Permission
     Properties: 
       FunctionName: 
-        Ref: "LambdaFunction"
+        Ref: "EmailNotificationsLambda"
       Action: "lambda:InvokeFunction"
       Principal: "events.amazonaws.com"
       SourceArn: 
