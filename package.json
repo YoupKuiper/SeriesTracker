@@ -1,11 +1,11 @@
 {
-  "name": "TVShowsTracker",
+  "name": "tvshowstracker",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "testEmailNotificationLambdaLocal.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "local": "ts-node ./local/testHandlerLocal.ts",
+    "local:email": "ts-node ./local/testEmailNotificationLambdaLocal.ts",
     "build": "tsc"
   },
   "keywords": [],
