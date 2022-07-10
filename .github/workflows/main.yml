@@ -51,5 +51,5 @@ jobs:
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }},
             TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }},
             VerifiedEmailAddress=${{ secrets.VERIFIED_EMAIL_ADDRESS }},
-            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }}
+            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }},
             UserTableName=${{ env.USER_TABLE_NAME }}
