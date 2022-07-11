@@ -133,11 +133,11 @@ Resources:
           - LambdaIAMRole
           - Arn
 
-  UpdateUserSettingsLambda:
+  UpdateUserRecordLambda:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName:
-        Fn::Sub: UpdateUserSettingsLambda
+        Fn::Sub: UpdateUserRecordLambda
       Description: Lambda function used for updating user settings
       Runtime: nodejs16.x
       Code:
@@ -148,7 +148,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
-      Handler: UpdateUserSettingsLambda.handler
+      Handler: UpdateUserRecordLambda.handler
       MemorySize: 128
       Timeout: 10
       Role:
