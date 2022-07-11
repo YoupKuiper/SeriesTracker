@@ -16,6 +16,9 @@ Parameters:
   UserTableName:
     Type: String
     Description: Name of DynamoDB table that holds user data
+  JWTSecret:
+    Type: String
+    Description: Secret used for signing JWT token
 
 Resources:
 
@@ -79,6 +82,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          JWT_SECRET: !Ref JWTSecret
       Handler: AccountCreationLambda.handler
       MemorySize: 128
       Timeout: 10
@@ -102,6 +106,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          JWT_SECRET: !Ref JWTSecret
       Handler: LoginLambda.handler
       MemorySize: 128
       Timeout: 10
@@ -125,6 +130,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          JWT_SECRET: !Ref JWTSecret
       Handler: LogoutLambda.handler
       MemorySize: 128
       Timeout: 10
@@ -148,6 +154,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          JWT_SECRET: !Ref JWTSecret
       Handler: UpdateUserRecordLambda.handler
       MemorySize: 128
       Timeout: 10
