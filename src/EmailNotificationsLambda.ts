@@ -13,7 +13,7 @@ export const handler = async (event: any, context: any)=> {
         // Call movieDB to get todays airing tv shows
         const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=1`);
 
-        let promises = [];
+        let promises : Promise<any>[] = []
 
         console.log(`Total pages of tv shows airing today: ${response.data.total_pages}`)
 
