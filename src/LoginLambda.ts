@@ -15,6 +15,8 @@ export const handler = async (event: any, context: any)=> {
         }).promise() || {}
 
         console.log(`USER: ${JSON.stringify(user)}`)
+        const parsedUser = aws.DynamoDB.Converter.marshall(user)
+        console.log(`UNMARSHALLED USER: ${JSON.stringify(parsedUser)}`)
 
         // // Check if password is correct
         // if(await isCorrectPassword(event.body.password, user.Item?.hashedPassword)){
