@@ -35,7 +35,7 @@ export const handler = async (event: any, context: any)=> {
             }
         }
 
-        console.log(`Params after running through loop ${params}`)
+        console.log(`Params after running through loop ${JSON.stringify(params)}`)
     
         return await dynamoDB.updateItem(params).promise();
 
