@@ -13,9 +13,16 @@ export const handler = async (event: any, context: any)=> {
                 "EmailAddress": event.body.username
             }),
             TableName: process.env.USER_TABLE_NAME || '',
-        }).promise() || {}
+        }).promise()
 
-        const parsedUser = aws.DynamoDB.Converter.unmarshall(user.Item ? user.Item : {})
+        if(!user.Item){
+            return {
+                statusCode: '400',
+                body: 'Invalid credentials'
+            }
+        }
+
+        const parsedUser = aws.DynamoDB.Converter.unmarshall(user.Item)
 
         // Check if password is correct
         if(await isCorrectPassword(event.body.password, parsedUser.hashedPassword)){
