@@ -171,10 +171,10 @@ Resources:
         ReadCapacityUnits: "5"
         WriteCapacityUnits: "5"
       AttributeDefinitions:
-      - AttributeName: "EmailAddress"
+      - AttributeName: "emailAddress"
         AttributeType: "S"
       KeySchema:
-      - AttributeName: "EmailAddress"
+      - AttributeName: "emailAddress"
         KeyType: "HASH"
 
   ## MISCELLANEOUS
