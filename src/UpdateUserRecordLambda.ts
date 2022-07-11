@@ -29,7 +29,7 @@ export const handler = async (event: any, context: any)=> {
             let attribute = attributes[i];
             if (attribute != idAttributeName) {
                 params["UpdateExpression"] += prefix + "#" + attribute + " = :" + attribute;
-                params["ExpressionAttributeValues"][":" + attribute] = body[attribute];
+                params["ExpressionAttributeValues"][":" + attribute] = body.settings[attribute];
                 params["ExpressionAttributeNames"]["#" + attribute] = attribute;
                 prefix = ", ";
             }
