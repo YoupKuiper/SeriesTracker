@@ -10,7 +10,7 @@ export const handler = async (event: any, context: any)=> {
         // Get user from DynamoDB by EmailAddress
         const user = await dynamoDB.getItem({
             Key: aws.DynamoDB.Converter.marshall({
-                "EmailAddress": event.body.username
+                "emailAddress": event.body.username
             }),
             TableName: process.env.USER_TABLE_NAME || '',
         }).promise()
