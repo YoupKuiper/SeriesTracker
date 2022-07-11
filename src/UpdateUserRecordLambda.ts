@@ -24,12 +24,12 @@ export const handler = async (event: any, context: any)=> {
         params["Key"][idAttributeName] = decodedToken["data"][idAttributeName];
     
         let prefix = "set ";
-        let attributes = Object.keys(body.settings);
+        let attributes = Object.keys(body.updateObject);
         for (let i=0; i<attributes.length; i++) {
             let attribute = attributes[i];
             if (attribute != idAttributeName) {
                 params["UpdateExpression"] += prefix + "#" + attribute + " = :" + attribute;
-                params["ExpressionAttributeValues"][":" + attribute] = body.settings[attribute];
+                params["ExpressionAttributeValues"][":" + attribute] = body.updateObject[attribute];
                 params["ExpressionAttributeNames"]["#" + attribute] = attribute;
                 prefix = ", ";
             }
