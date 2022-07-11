@@ -24,6 +24,10 @@ export const handler = async (event: any, context: any)=> {
 
         const parsedUser = aws.DynamoDB.Converter.unmarshall(user.Item)
 
+        console.log(`Parsed user: ${JSON.stringify(parsedUser)}`);
+        console.log(`body password ${JSON.stringify(event.body.password)}`);
+        console.log(`hashedPassword from db: ${JSON.stringify(parsedUser.hashedPassword)}`);
+
         // Check if password is correct
         if(await isCorrectPassword(event.body.password, parsedUser.hashedPassword)){
             // Endcode a JWT token and return
