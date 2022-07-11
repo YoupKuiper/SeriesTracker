@@ -6,5 +6,5 @@ export const createPasswordHash = async (plainTextPassword: string) => {
 
 
 export const isCorrectPassword = async (password: string, hashedPassword: string) => {
-    return !!await bcrypt.compare(password, hashedPassword)
+    return await bcrypt.compare(password, hashedPassword)
 }

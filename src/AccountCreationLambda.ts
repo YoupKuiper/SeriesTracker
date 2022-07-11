@@ -13,7 +13,7 @@ export const handler = async (event: any, context: any)=> {
         // Save unverified user to dynamodb
         const record = {
             Item: aws.DynamoDB.Converter.marshall({
-                "emailAddress":  event.body.username,
+                "emailAddress":  event.body.emailAddress,
                 "hashedPassword": hashedPassword,
                 "emailAddressVerified": false,
                 "settings": {
@@ -30,7 +30,7 @@ export const handler = async (event: any, context: any)=> {
 
         // Send verification email
         var verificationParams = {
-            EmailAddress: event.body.username
+            EmailAddress: event.body.emailAddress
         };
         await ses.verifyEmailIdentity(verificationParams).promise();
 

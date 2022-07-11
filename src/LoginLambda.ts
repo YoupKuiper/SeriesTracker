@@ -10,7 +10,7 @@ export const handler = async (event: any, context: any)=> {
         // Get user from DynamoDB by EmailAddress
         const user = await dynamoDB.getItem({
             Key: aws.DynamoDB.Converter.marshall({
-                "emailAddress": event.body.username
+                "emailAddress": event.body.emailAddress
             }),
             TableName: process.env.USER_TABLE_NAME || '',
         }).promise()
@@ -24,17 +24,13 @@ export const handler = async (event: any, context: any)=> {
 
         const parsedUser = aws.DynamoDB.Converter.unmarshall(user.Item)
 
-        console.log(`Parsed user: ${JSON.stringify(parsedUser)}`);
-        console.log(`body password ${JSON.stringify(event.body.password)}`);
-        console.log(`hashedPassword from db: ${JSON.stringify(parsedUser.hashedPassword)}`);
-
         // Check if password is correct
         if(await isCorrectPassword(event.body.password, parsedUser.hashedPassword)){
             // Endcode a JWT token and return
             if(process.env.JWT_SECRET){
                 const token = jwt.sign({
                     exp: Math.floor(Date.now() / 1000) + (60 * 60), //expire after 1 hour
-                    data: { username: parsedUser.username }
+                    data: { emailAddress: parsedUser.emailAddress }
                   }, process.env.JWT_SECRET);
 
                   return {
