@@ -4,8 +4,7 @@ const ses = new aws.SES({ region: process.env.AWS_REGION });
 
 
 export const handler = async (event: any, context: any)=> {
-    console.log(`Event: ${JSON.stringify(event, null, 2)}`);
-    console.log(`Context: ${JSON.stringify(context, null, 2)}`);
+  console.log(`Incoming event body: ${JSON.stringify(event.body)}`)
 
     // Hardcoded list of tv shows to track
     const TVShowsToTrack = [202740, 133985, 107116, 205118]

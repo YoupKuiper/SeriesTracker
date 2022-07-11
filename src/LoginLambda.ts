@@ -28,11 +28,8 @@ export const handler = async (event: any, context: any)=> {
         if(await isCorrectPassword(event.body.password, parsedUser.hashedPassword)){
             // Endcode a JWT token and return
             if(process.env.JWT_SECRET){
-                const token = jwt.sign({
-                    exp: Math.floor(Date.now() / 1000) + (60 * 60), //expire after 1 hour
-                    data: { emailAddress: parsedUser.emailAddress }
-                  }, process.env.JWT_SECRET);
-
+                const token = signTokenFor(parsedUser.emailAddress)
+                
                   return {
                     statusCode: '200',
                     body: JSON.stringify({token})
