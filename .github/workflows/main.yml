@@ -8,7 +8,7 @@ jobs:
     env:
       CODE_ZIPFILE_NAME: TVShowsTrackerCode-${{ github.run_id }}-${{ github.run_attempt }}.zip
       AWS_REGION: eu-west-1
-      USER_TABLE_NAME: Users
+      USER_TABLE_NAME: UserData
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
