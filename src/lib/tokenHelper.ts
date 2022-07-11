@@ -9,6 +9,6 @@ export const signTokenFor = (emailAddress: string) => {
 
 export const isValid = (token: string) => {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET || '')
-    console.log(`Decoded token: ${decodedToken}`)
+    console.log(`Decoded token: ${JSON.stringify('decodedToken')}`)
     return decodedToken;
 }
