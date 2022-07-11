@@ -24,7 +24,7 @@ export const handler = async (event: any, context: any)=> {
         params["Key"][idAttributeName] = decodedToken["data"][idAttributeName];
     
         let prefix = "set ";
-        let attributes = Object.keys(body);
+        let attributes = Object.keys(body.settings);
         for (let i=0; i<attributes.length; i++) {
             let attribute = attributes[i];
             if (attribute != idAttributeName) {
@@ -34,6 +34,8 @@ export const handler = async (event: any, context: any)=> {
                 prefix = ", ";
             }
         }
+
+        console.log(`Params after running through loop ${params}`)
     
         return await dynamoDB.updateItem(params).promise();
 
