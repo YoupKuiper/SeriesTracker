@@ -13,12 +13,12 @@ export const handler = async (event: any, context: any)=> {
         // Save unverified user to dynamodb
         const record = {
             Item: aws.DynamoDB.Converter.marshall({
-                "EmailAddress":  event.body.username,
-                "HashedPassword": hashedPassword,
-                "EmailAddressVerified": false,
-                "Settings": {
-                    "WantsEmailNotifications": false,
-                    "TrackedTVShows": [] 
+                "emailAddress":  event.body.username,
+                "hashedPassword": hashedPassword,
+                "emailAddressVerified": false,
+                "settings": {
+                    "wantsEmailNotifications": false,
+                    "trackedTVShows": [] 
                 }
             }),
             ReturnConsumedCapacity: "TOTAL", 
