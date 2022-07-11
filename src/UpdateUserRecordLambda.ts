@@ -13,29 +13,29 @@ export const handler = async (event: any, context: any)=> {
         // If valid user record data, put to DB
         let params = {
             TableName: process.env.USER_TABLE_NAME || '',
-            Key: { emailAddress: ''},
+            Key: {},
             ExpressionAttributeValues: {},
             ExpressionAttributeNames: {},
             UpdateExpression: "",
             ReturnValues: "ALL_NEW"
         };
 
-        // const idAttributeName = 'emailAddress'
-        // params["Key"][idAttributeName] = decodedToken[idAttributeName];
+        const idAttributeName = 'emailAddress'
+        params["Key"][idAttributeName] = decodedToken["data"][idAttributeName];
     
-        // let prefix = "set ";
-        // let attributes = Object.keys(body);
-        // for (let i=0; i<attributes.length; i++) {
-        //     let attribute = attributes[i];
-        //     if (attribute != idAttributeName) {
-        //         params["UpdateExpression"] += prefix + "#" + attribute + " = :" + attribute;
-        //         params["ExpressionAttributeValues"][":" + attribute] = item[attribute];
-        //         params["ExpressionAttributeNames"]["#" + attribute] = attribute;
-        //         prefix = ", ";
-        //     }
-        // }
+        let prefix = "set ";
+        let attributes = Object.keys(body);
+        for (let i=0; i<attributes.length; i++) {
+            let attribute = attributes[i];
+            if (attribute != idAttributeName) {
+                params["UpdateExpression"] += prefix + "#" + attribute + " = :" + attribute;
+                params["ExpressionAttributeValues"][":" + attribute] = body[attribute];
+                params["ExpressionAttributeNames"]["#" + attribute] = attribute;
+                prefix = ", ";
+            }
+        }
     
-        // return await dynamoDB.updateItem(params).promise();
+        return await dynamoDB.updateItem(params).promise();
 
         // Send back 200 if success
 

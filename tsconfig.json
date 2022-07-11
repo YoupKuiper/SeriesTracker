@@ -12,7 +12,8 @@
     "outDir": "dist",
     "forceConsistentCasingInFileNames": true, 
     "isolatedModules": true, 
-    "rootDirs": ["src/", "config/"]
+    "rootDirs": ["src/", "config/"],
+    "noImplicitAny": false
   },
   "include": ["src/**/*", "./typings"],
   "exclude": ["node_modules", "bin", "**/__mocks__*", "**/*.spec.**", "test", "assets"]
