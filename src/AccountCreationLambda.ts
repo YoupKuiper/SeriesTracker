@@ -4,7 +4,7 @@ const ses = new aws.SES({ region: process.env.AWS_REGION });
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
 export const handler = async (event: any, context: any)=> {
-    console.log(`Incoming event body: ${event.body}`)
+    console.log(`Incoming event body: ${JSON.stringify(event.body)}`)
     
     try {
         // Create hash from password
@@ -25,13 +25,14 @@ export const handler = async (event: any, context: any)=> {
             TableName: process.env.USER_TABLE_NAME || ''
         };
 
+        await dynamoDB.putItem(record).promise()
 
-            await dynamoDB.putItem(record).promise()
+        // Send verification email
+        const emailToVerify = {
+            EmailAddress: event.body.username
+        };
+        ses.verifyEmailIdentity(emailToVerify).promise()
     } catch (error) {
         console.log(error)
     }
-
-
-
-    // Send verification email
 }
