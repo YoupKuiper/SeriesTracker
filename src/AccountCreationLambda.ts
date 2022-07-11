@@ -29,10 +29,17 @@ export const handler = async (event: any, context: any)=> {
         await dynamoDB.putItem(record).promise()
 
         // Send verification email
-        const emailToVerify = {
+        // const emailToVerify = {
+        //     EmailAddress: event.body.username
+        // };
+        // ses.verifyEmailIdentity(emailToVerify).promise()
+        var params = {
             EmailAddress: event.body.username
-        };
-        ses.verifyEmailIdentity(emailToVerify).promise()
+           };
+           ses.verifyEmailIdentity(params, function(err, data) {
+             if (err) console.log(err, err.stack); // an error occurred
+             else     console.log(data);           // successful response
+           });
     } catch (error) {
         console.log(error)
     }
