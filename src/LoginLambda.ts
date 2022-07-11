@@ -1,6 +1,6 @@
 import aws from "aws-sdk";
 import { isCorrectPassword } from "./lib/passwordHelper";
-import jwt from 'jsonwebtoken';
+import { signTokenFor } from "./lib/tokenHelper";
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
 export const handler = async (event: any, context: any)=> {
