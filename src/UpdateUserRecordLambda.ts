@@ -35,9 +35,8 @@ export const handler = async (event: any, context: any)=> {
             }
         }
 
-        console.log(`Params after running through loop ${JSON.stringify(params)}`)
         params.Key = aws.DynamoDB.Converter.marshall(params.Key)
-        params.ExpressionAttributeNames = aws.DynamoDB.Converter.marshall(params.ExpressionAttributeNames)
+        console.log(`Params after running through loop ${JSON.stringify(params)}`)
     
         return await dynamoDB.updateItem(params).promise();
 
