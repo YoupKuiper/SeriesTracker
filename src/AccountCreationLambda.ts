@@ -22,7 +22,8 @@ export const handler = async (event: any, context: any)=> {
                 }
             }),
             ReturnConsumedCapacity: "TOTAL", 
-            TableName: process.env.USER_TABLE_NAME || ''
+            TableName: process.env.USER_TABLE_NAME || '',
+            ConditionExpression: 'attribute_not_exists(EmailAddress)'
         };
 
         await dynamoDB.putItem(record).promise()
