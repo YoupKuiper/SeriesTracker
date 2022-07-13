@@ -1,5 +1,6 @@
 import aws from "aws-sdk";
 import { isCorrectPassword } from "./lib/passwordHelper";
+import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 import { signTokenFor } from "./lib/tokenHelper";
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
@@ -16,10 +17,7 @@ export const handler = async (event: any, context: any)=> {
         }).promise()
 
         if(!user.Item){
-            return {
-                statusCode: '400',
-                body: 'Invalid credentials'
-            }
+            return sendErrorResponse('Invalid credentials');
         }
 
         const parsedUser = aws.DynamoDB.Converter.unmarshall(user.Item)
@@ -30,15 +28,13 @@ export const handler = async (event: any, context: any)=> {
             if(process.env.JWT_SECRET){
                 const token = signTokenFor(parsedUser.emailAddress)
                 
-                  return {
-                    statusCode: '200',
-                    body: JSON.stringify({token})
-                  }
+                return sendOKResponse({token});
             }
             throw new Error(`Environment variable for JWT secret required`);
         }
     } catch (error) {
-        console.log(error)
+        console.error(error)
+        return sendErrorResponse('Failed log in user')
     }
 
 }

@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 import aws from "aws-sdk";
+import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 const ses = new aws.SES({ region: process.env.AWS_REGION });
 
 
@@ -52,16 +53,12 @@ export const handler = async (event: any, context: any)=> {
           const sendEmailResponse = await ses.sendEmail(params).promise()
           console.log(sendEmailResponse)
 
+          return sendOKResponse('Emails sent successfully')
+
       } catch (error) {
         console.error(error);
+        return sendErrorResponse('Failed to send email')
       }
-
-    return {
-        statusCode: 200,
-        body: JSON.stringify({
-            message: 'hello world',
-        }),
-    };
 };
 
 

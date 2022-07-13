@@ -1,5 +1,6 @@
 import aws from "aws-sdk";
 import { createPasswordHash } from "./lib/passwordHelper";
+import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 const ses = new aws.SES({ region: process.env.AWS_REGION });
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
@@ -33,8 +34,11 @@ export const handler = async (event: any, context: any)=> {
             EmailAddress: event.body.emailAddress
         };
         await ses.verifyEmailIdentity(verificationParams).promise();
+        
+        return sendOKResponse('Account created')
 
     } catch (error) {
-        console.log(error)
+        console.error(error)
+        return sendErrorResponse('Account creation failed')
     }
 }

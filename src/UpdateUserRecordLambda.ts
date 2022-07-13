@@ -1,4 +1,5 @@
 import aws from "aws-sdk";
+import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 import { isValid } from "./lib/tokenHelper";
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
@@ -39,12 +40,13 @@ export const handler = async (event: any, context: any)=> {
         params.ExpressionAttributeValues = aws.DynamoDB.Converter.marshall(params.ExpressionAttributeValues)
         console.log(`Params after running through loop ${JSON.stringify(params)}`)
     
-        return await dynamoDB.updateItem(params).promise();
+        const updatedItem = await dynamoDB.updateItem(params).promise();
 
-        // Send back 200 if success
+        console.log(`Updated item: ${JSON.stringify(updatedItem)}`)
+        return sendOKResponse('User updated successfully!')
 
     } catch (error) {
-        console.log(error)
+        console.error(error)
+        return sendErrorResponse('Failed to update user data')
     }
-
 }
