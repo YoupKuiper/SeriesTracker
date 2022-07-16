@@ -25,7 +25,11 @@ export const handler = async (event: any, context: any)=> {
         params["Key"][idAttributeName] = decodedToken["data"][idAttributeName];
     
         let prefix = "set ";
-        let attributes = Object.keys(body.updateObject);
+        // Prevent password to be updated
+        const { hashedPassword, ...updateObjectWithoutPasswordHash } = body.updateObject;
+        console.log(`Update params: ${JSON.stringify(updateObjectWithoutPasswordHash)}`)
+        let attributes = Object.keys(updateObjectWithoutPasswordHash);
+        
         for (let i=0; i<attributes.length; i++) {
             let attribute = attributes[i];
             if (attribute != idAttributeName) {
