@@ -30,6 +30,9 @@ export const handler = async (event: any, context: any)=> {
         })
         
         console.log(`Tracked tv shows found: ${JSON.stringify(trackedTVShowsAiringToday)}`)
+        if(!trackedTVShowsAiringToday){
+          return sendOKResponse('No tracked shows airing today')
+        }
 
         let trackedTVShowsNames = '';
         for (let [index, TVShow] of trackedTVShowsAiringToday.entries()) {
