@@ -17,7 +17,7 @@ export const handler = async (event: any, context: any)=> {
         }
 
         const tvShowsToTrack = user['settings']['trackedTVShows']
-        console.log(`TV Shows to track ${tvShowsToTrack}`)
+        console.log(`TV Shows to track ${typeof tvShowsToTrack}`)
 
 
         // Call movieDB to get todays airing tv shows
