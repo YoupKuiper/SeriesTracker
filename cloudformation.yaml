@@ -167,27 +167,27 @@ Resources:
       Integration:
         IntegrationHttpMethod: POST
         Type: MOCK
-      ResourceId: !GetAtt apiGateway.RootResourceId
+      ResourceId: !GetAtt ApiGateway.RootResourceId
       RestApiId: !Ref ApiGateway
 
   ApiGatewayLoginResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt apiGateway.RootResourceId
+      ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: /Login
       RestApiId: !Ref ApiGateway
 
   ApiGatewayCreateAccountResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt apiGateway.RootResourceId
+      ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: /CreateAccount
       RestApiId: !Ref ApiGateway
 
   ApiGatewayUpdateUserResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt apiGateway.RootResourceId
+      ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: /UpdateUser
       RestApiId: !Ref ApiGateway
 
