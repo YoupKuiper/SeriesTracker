@@ -32,6 +32,10 @@ export const handler = async (event: any, context: any)=> {
             }
             throw new Error(`Environment variable for JWT secret required`);
         }
+        
+        if(!user.Item){
+            return sendErrorResponse('Invalid credentials');
+        }
     } catch (error) {
         console.error(error)
         return sendErrorResponse('Failed log in user')

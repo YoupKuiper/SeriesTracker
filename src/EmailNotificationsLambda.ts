@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 import aws from "aws-sdk";
+import { DynamoDBClient } from "./DynamoDBClient";
 import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 const ses = new aws.SES({ region: process.env.AWS_REGION });
 
@@ -7,10 +8,14 @@ const ses = new aws.SES({ region: process.env.AWS_REGION });
 export const handler = async (event: any, context: any)=> {
   console.log(`Incoming event body: ${JSON.stringify(event.body)}`)
 
-    // Hardcoded list of tv shows to track
-    const TVShowsToTrack = [202740, 133985, 107116, 205118]
-
     try {
+        // Get list of shows from Dynamodb
+        let TVShowsToTrack = [202740, 133985, 107116, 205118]
+
+        const user = await new DynamoDBClient().getUserFromDynamoDBByEmailAddress(process.env.VERIFIED_EMAIL_ADDRESS || '');
+        console.log(`USER: ${JSON.stringify(user)}`)
+        
+
         // Call movieDB to get todays airing tv shows
         const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=1`);
 
