@@ -174,21 +174,21 @@ Resources:
     Type: AWS::ApiGateway::Resource
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
-      PathPart: /Login
+      PathPart: Login
       RestApiId: !Ref ApiGateway
 
   ApiGatewayCreateAccountResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
-      PathPart: /CreateAccount
+      PathPart: CreateAccount
       RestApiId: !Ref ApiGateway
 
   ApiGatewayUpdateUserResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
-      PathPart: /UpdateUser
+      PathPart: UpdateUser
       RestApiId: !Ref ApiGateway
 
   ApiGatewayDeployment:
