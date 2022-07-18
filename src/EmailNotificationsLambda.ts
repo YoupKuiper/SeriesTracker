@@ -9,12 +9,16 @@ export const handler = async (event: any, context: any)=> {
   console.log(`Incoming event body: ${JSON.stringify(event.body)}`)
 
     try {
-        // Get list of shows from Dynamodb
-        let TVShowsToTrack = [202740, 133985, 107116, 205118]
 
         const user = await new DynamoDBClient().getUserFromDynamoDBByEmailAddress(process.env.VERIFIED_EMAIL_ADDRESS || '');
         console.log(`USER: ${JSON.stringify(user)}`)
-        
+        if(!user){
+          throw new Error(`Failed to get user from DB`);
+        }
+
+        const tvShowsToTrack = user['settings']['trackedTVShows']
+        console.log(`TV Shows to track ${tvShowsToTrack}`)
+
 
         // Call movieDB to get todays airing tv shows
         const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=1`);
@@ -31,7 +35,7 @@ export const handler = async (event: any, context: any)=> {
         const allTVShowsAiringToday = Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
 
         const trackedTVShowsAiringToday = allTVShowsAiringToday.filter(TVShow => {
-            return TVShowsToTrack.includes(TVShow.id)
+            return tvShowsToTrack.includes(TVShow.id)
         })
         
         console.log(`Tracked tv shows found: ${JSON.stringify(trackedTVShowsAiringToday)}`)
