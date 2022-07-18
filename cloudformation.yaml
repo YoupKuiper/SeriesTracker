@@ -157,7 +157,7 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
-      Name: !Ref apiGatewayName
+      Name: !Ref APIGatewayName
 
   ApiGatewayRootMethod:
     Type: AWS::ApiGateway::Method
