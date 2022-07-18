@@ -17,7 +17,7 @@ export const handler = async (event: any, context: any)=> {
         }
 
         const tvShowsToTrack = user['settings']['trackedTVShows']
-        console.log(`TV Shows to track ${typeof tvShowsToTrack}`)
+        console.log(`TV Shows to track ${tvShowsToTrack[0]}`)
 
 
         // Call movieDB to get todays airing tv shows
@@ -33,6 +33,8 @@ export const handler = async (event: any, context: any)=> {
 
         const allTVShowsAiringTodayPaged = await Promise.all(promises);
         const allTVShowsAiringToday = Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
+
+        console.log(`Airing today: ${allTVShowsAiringToday}`)
 
         const trackedTVShowsAiringToday = allTVShowsAiringToday.filter(TVShow => {
             return tvShowsToTrack.includes(TVShow.id)
