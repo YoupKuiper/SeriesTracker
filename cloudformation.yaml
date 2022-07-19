@@ -159,15 +159,37 @@ Resources:
           - REGIONAL
       Name: !Ref APIGatewayName
 
-  ApiGatewayRootMethod:
+  ApiGatewayLoginMethod:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
       HttpMethod: !Ref ApiGatewayHTTPMethod
       Integration:
         IntegrationHttpMethod: POST
-        Type: MOCK
-      ResourceId: !GetAtt ApiGateway.RootResourceId
+        Type: AWS_PROXY
+      ResourceId: !Ref ApiGatewayLoginResource
+      RestApiId: !Ref ApiGateway
+
+  ApiGatewayCreateAccountMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+      ResourceId: !Ref ApiGatewayCreateAccountResource
+      RestApiId: !Ref ApiGateway
+
+  ApiGatewayUpdateUserMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+      ResourceId: !Ref ApiGatewayUpdateUserResource
       RestApiId: !Ref ApiGateway
 
   ApiGatewayLoginResource:
@@ -194,7 +216,9 @@ Resources:
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
-      - ApiGatewayRootMethod
+      - ApiGatewayLoginMethod
+      - ApiGatewayCreateAccountMethod
+      - ApiGatewayUpdateUserMethod
     Properties:
       RestApiId: !Ref ApiGateway
       StageName: !Ref ApiGatewayStageName
