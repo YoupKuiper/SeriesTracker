@@ -275,7 +275,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt LoginLambda.Arn
       Principal: apigateway.amazonaws.com          
-      # SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${ApiGatewayStageName}/${ApiGatewayHTTPMethod}/Login
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/Login
 
   LambdaApiGatewayInvokeCreateAccount:
     Type: AWS::Lambda::Permission
@@ -283,7 +283,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt AccountCreationLambda.Arn
       Principal: apigateway.amazonaws.com          
-      # SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${ApiGatewayStageName}/${ApiGatewayHTTPMethod}/CreateAccount
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/CreateAccount
 
   LambdaApiGatewayInvokeUpdateUser:
     Type: AWS::Lambda::Permission
@@ -291,4 +291,4 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt UpdateUserRecordLambda.Arn
       Principal: apigateway.amazonaws.com          
-      # SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/${ApiGatewayStageName}/${ApiGatewayHTTPMethod}/UpdateUser
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/UpdateUser
