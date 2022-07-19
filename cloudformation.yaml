@@ -167,9 +167,9 @@ Resources:
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayLoginResource
       RestApiId: !Ref ApiGateway
-      Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLambda.Arn}/invocations
 
 
   ApiGatewayCreateAccountMethod:
@@ -180,9 +180,9 @@ Resources:
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AccountCreationLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayCreateAccountResource
       RestApiId: !Ref ApiGateway
-      Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AccountCreationLambda.Arn}/invocations
 
   ApiGatewayUpdateUserMethod:
     Type: AWS::ApiGateway::Method
@@ -192,9 +192,9 @@ Resources:
       Integration:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateUserRecordLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayUpdateUserResource
       RestApiId: !Ref ApiGateway
-      Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateUserRecordLambda.Arn}/invocations
 
   ApiGatewayLoginResource:
     Type: AWS::ApiGateway::Resource
