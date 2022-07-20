@@ -5,9 +5,11 @@ import { signTokenFor } from "./lib/tokenHelper";
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
 export const handler = async (event: any, context: any)=> {
+    console.log(event)
+    console.log(event.body)
     console.log(`Incoming event body: ${JSON.stringify(event.body)}`);
 
-    const { password, emailAddress } = JSON.parse(JSON.parse(event.body))
+    const { password, emailAddress } = JSON.parse(event.body)
 
     try {
         // Get user from DynamoDB by EmailAddress
