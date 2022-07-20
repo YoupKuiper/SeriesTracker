@@ -7,11 +7,13 @@ const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 export const handler = async (event: any, context: any)=> {
     console.log(`Incoming event body: ${JSON.stringify(event.body)}`);
 
+    const { password, emailAddress } = JSON.parse(event.body)
+
     try {
         // Get user from DynamoDB by EmailAddress
         const user = await dynamoDB.getItem({
             Key: aws.DynamoDB.Converter.marshall({
-                "emailAddress": event.body.emailAddress
+                "emailAddress": emailAddress
             }),
             TableName: process.env.USER_TABLE_NAME || '',
         }).promise()
@@ -23,7 +25,7 @@ export const handler = async (event: any, context: any)=> {
         const { hashedPassword, ...parsedUser } = aws.DynamoDB.Converter.unmarshall(user.Item)
 
         // Check if password is correct
-        if(await isCorrectPassword(event.body.password, hashedPassword)){
+        if(await isCorrectPassword(password, hashedPassword)){
             // Endcode a JWT token and return
             if(process.env.JWT_SECRET){
                 const token = signTokenFor(parsedUser.emailAddress)
