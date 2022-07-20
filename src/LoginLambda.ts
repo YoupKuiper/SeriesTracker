@@ -7,7 +7,10 @@ const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 export const handler = async (event: any, context: any)=> {
     console.log(`Incoming event body: ${JSON.stringify(event.body)}`);
 
-    const { password, emailAddress } = event.body
+    const parsedEvent = JSON.parse(event.body);
+    console.log(`Parsed event body: ${JSON.stringify(parsedEvent)}`);
+
+    const { password, emailAddress } = parsedEvent
 
     console.log(`Email address: ${emailAddress}`)
     console.log(`Password: ${password}`)
