@@ -5,11 +5,13 @@ const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
 export const handler = async (event: any, context: any)=> {
     console.log(`Incoming event body: ${JSON.stringify(event.body)}`)
+    
+    const parsedEvent = JSON.parse(event.body);
+    console.log(`Parsed event body: ${JSON.stringify(parsedEvent)}`);
 
     try {
-        const body = event.body;
         // Check if token is valid
-        const decodedToken = isValid(body.token);
+        const decodedToken = isValid(parsedEvent.token);
         
         // If valid user record data, put to DB
         let params = {
@@ -26,7 +28,7 @@ export const handler = async (event: any, context: any)=> {
     
         let prefix = "set ";
         // Prevent password to be updated
-        const { hashedPassword, ...updateObjectWithoutPasswordHash } = body.updateObject;
+        const { hashedPassword, ...updateObjectWithoutPasswordHash } = parsedEvent.updateObject;
         console.log(`Update params: ${JSON.stringify(updateObjectWithoutPasswordHash)}`)
         let attributes = Object.keys(updateObjectWithoutPasswordHash);
         
@@ -34,7 +36,7 @@ export const handler = async (event: any, context: any)=> {
             let attribute = attributes[i];
             if (attribute != idAttributeName) {
                 params["UpdateExpression"] += prefix + "#" + attribute + " = :" + attribute;
-                params["ExpressionAttributeValues"][":" + attribute] = body.updateObject[attribute];
+                params["ExpressionAttributeValues"][":" + attribute] = parsedEvent.updateObject[attribute];
                 params["ExpressionAttributeNames"]["#" + attribute] = attribute;
                 prefix = ", ";
             }
