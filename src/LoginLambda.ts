@@ -13,7 +13,6 @@ export const handler = async (event: any, context: any)=> {
     const { password, emailAddress } = parsedEvent
 
     console.log(`Email address: ${emailAddress}`)
-    console.log(`Password: ${password}`)
 
     try {
         // Get user from DynamoDB by EmailAddress
