@@ -48,6 +48,10 @@ export const handler = async (event: any, context: any)=> {
         console.log(`Params after running through loop ${JSON.stringify(params)}`)
     
         const updatedUser = await dynamoDB.updateItem(params).promise();
+        if(!updatedUser){
+            return sendErrorResponse('Failed to update user data')
+        }
+        
         const parsedUser = aws.DynamoDB.Converter.unmarshall(updatedUser.Attributes || {});
         console.log(JSON.stringify(parsedUser));
         const { hashedPassword, ...userWithoutPassword } = parsedUser;

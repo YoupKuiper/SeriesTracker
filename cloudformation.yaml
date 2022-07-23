@@ -16,6 +16,9 @@ Parameters:
   UserTableName:
     Type: String
     Description: Name of DynamoDB table that holds user data
+  TvShowsTableName:
+    Type: String
+    Description: Name of DynamoDB table that holds tv shows
   JWTSecret:
     Type: String
     Description: Secret used for signing JWT token
@@ -69,6 +72,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
       Handler: EmailNotificationsLambda.handler
       MemorySize: 128
       Timeout: 10
@@ -92,6 +96,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
           JWT_SECRET: !Ref JWTSecret
       Handler: AccountCreationLambda.handler
       MemorySize: 128
@@ -116,6 +121,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
           JWT_SECRET: !Ref JWTSecret
       Handler: LoginLambda.handler
       MemorySize: 128
@@ -140,6 +146,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
           JWT_SECRET: !Ref JWTSecret
       Handler: UpdateUserRecordLambda.handler
       MemorySize: 128
@@ -242,6 +249,20 @@ Resources:
       - AttributeName: "emailAddress"
         KeyType: "HASH"
 
+  UsersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Ref TvShowsTableName
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      AttributeDefinitions:
+      - AttributeName: "emailAddress"
+        AttributeType: "S"
+      KeySchema:
+      - AttributeName: "emailAddress"
+        KeyType: "HASH"
+        
   ## MISCELLANEOUS
   ScheduledRule: 
     Type: AWS::Events::Rule
