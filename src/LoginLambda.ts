@@ -16,26 +16,26 @@ export const handler = async (event: any, context: any)=> {
 
     try {
         // Get user from DynamoDB by EmailAddress
-        const user = await dynamoDB.getItem({
+        const userDto = await dynamoDB.getItem({
             Key: aws.DynamoDB.Converter.marshall({
                 "emailAddress": emailAddress
             }),
             TableName: process.env.USER_TABLE_NAME || '',
         }).promise()
 
-        if(!user.Item){
+        if(!userDto.Item){
             return sendErrorResponse('Invalid credentials');
         }
 
-        const { hashedPassword, ...parsedUser } = aws.DynamoDB.Converter.unmarshall(user.Item)
+        const { hashedPassword, ...user } = aws.DynamoDB.Converter.unmarshall(userDto.Item)
 
         // Check if password is correct
         if(await isCorrectPassword(password, hashedPassword)){
             // Endcode a JWT token and return
             if(process.env.JWT_SECRET){
-                const token = signTokenFor(parsedUser.emailAddress)
+                const token = signTokenFor(user.emailAddress)
                 
-                return sendOKResponse({ token, parsedUser });
+                return sendOKResponse({ token, user });
             }
             throw new Error(`Environment variable for JWT secret required`);
         }
