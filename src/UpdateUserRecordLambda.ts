@@ -28,7 +28,7 @@ export const handler = async (event: any, context: any)=> {
     
         let prefix = "set ";
         // Prevent password to be updated, set default to prevent error when not passed
-        const { hashedPassword = '', ...updateObjectWithoutPasswordHash } = parsedEvent.updateObject;
+        const { hashedPassword = {}, ...updateObjectWithoutPasswordHash } = parsedEvent.updateObject;
         console.log(`Update params: ${JSON.stringify(updateObjectWithoutPasswordHash)}`)
         let attributes = Object.keys(updateObjectWithoutPasswordHash);
         
