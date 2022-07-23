@@ -48,7 +48,7 @@ export const handler = async (event: any, context: any)=> {
         console.log(`Params after running through loop ${JSON.stringify(params)}`)
     
         const updatedUser = await dynamoDB.updateItem(params).promise();
-        const parsedUser = aws.DynamoDB.Converter.unmarshall(updatedUser[0]);
+        const parsedUser = aws.DynamoDB.Converter.unmarshall(updatedUser.Attributes || {});
         console.log(JSON.stringify(parsedUser));
         const { hashedPassword, ...userWithoutPassword } = parsedUser;
         
