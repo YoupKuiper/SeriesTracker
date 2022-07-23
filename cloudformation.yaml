@@ -250,7 +250,7 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTrackedTVShowsLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayCreateAccountResource
+      ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
       RestApiId: !Ref ApiGateway
 
   ApiGatewayUpdateTrackedTVShowMethod:
@@ -262,7 +262,7 @@ Resources:
         IntegrationHttpMethod: POST
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateTrackedTVShowLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayCreateAccountResource
+      ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
       RestApiId: !Ref ApiGateway
 
   ApiGatewayUpdateUserMethod:
