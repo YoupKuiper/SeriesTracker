@@ -10,16 +10,9 @@ export const handler = async (event: any, context: any)=> {
 
     try {
 
-        const user = await new DynamoDBClient().getUserFromDynamoDBByEmailAddress(process.env.VERIFIED_EMAIL_ADDRESS || '');
-        console.log(`USER: ${JSON.stringify(user)}`)
-        if(!user){
-          throw new Error(`Failed to get user from DB`);
-        }
+        const trackedTVShows = await new DynamoDBClient().getTVShowsByEmailAddress(process.env.VERIFIED_EMAIL_ADDRESS || '')
 
-        const tvShowsToTrack = user['settings']['trackedTVShows']
-        console.log(`TV Shows to track ${tvShowsToTrack}`)
-
-        if(!tvShowsToTrack){
+        if(!trackedTVShows){
           return sendOKResponse('No tracked shows airing today')
         }
 
@@ -27,7 +20,6 @@ export const handler = async (event: any, context: any)=> {
         const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=1`);
 
         let promises : Promise<any>[] = []
-
         console.log(`Total pages of tv shows airing today: ${response.data.total_pages}`)
 
         for (let pageNumber = 1; pageNumber < response.data.total_pages+1; pageNumber++){
@@ -37,10 +29,7 @@ export const handler = async (event: any, context: any)=> {
         const allTVShowsAiringTodayPaged = await Promise.all(promises);
         const allTVShowsAiringToday = Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
 
-
-        const trackedTVShowsAiringToday = allTVShowsAiringToday.filter(TVShow => {
-            return tvShowsToTrack.includes(TVShow.id)
-        })
+        const trackedTVShowsAiringToday = trackedTVShows.filter((trackedShow) => allTVShowsAiringToday.find(airingToday => trackedShow.id === airingToday.id ));
         
         console.log(`Tracked tv shows found: ${JSON.stringify(trackedTVShowsAiringToday)}`)
         if(!trackedTVShowsAiringToday){
