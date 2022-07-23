@@ -16,25 +16,15 @@ export const handler = async (event: any, context: any)=> {
         const decodedToken = isValid(token);
         
         // Get TVShows from DynamoDB by EmailAddress
-        const newListOfTrackedTVShows = await dynamoDB.putItem({
+        await dynamoDB.putItem({
             Item: aws.DynamoDB.Converter.marshall({
                 "emailAddress": decodedToken.data.emailAddress,
                 "trackedTVShows": tvShowsList
             }),
-            ReturnValues: "ALL_NEW",
             TableName: process.env.TV_SHOWS_TABLE_NAME || '',
         }).promise()
 
-        console.log(`New list of tracked TV Shows: ${JSON.stringify(newListOfTrackedTVShows)}`)
-
-        if(!newListOfTrackedTVShows.Attributes){
-            // No TV shows found, return empty list
-            return sendOKResponse({
-                trackedTvShows: []
-            });
-        }
-
-        return sendOKResponse(aws.DynamoDB.Converter.unmarshall(newListOfTrackedTVShows.Attributes).trackedTvShows)     
+        return sendOKResponse(tvShowsList)     
     } catch (error) {
         console.error(error)
         return sendErrorResponse('Failed log in user')

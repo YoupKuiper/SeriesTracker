@@ -19,10 +19,9 @@ export const handler = async (event: any, context: any)=> {
             Item: aws.DynamoDB.Converter.marshall({
                 "emailAddress":  parsedEvent.emailAddress,
                 "hashedPassword": hashedPassword,
-                "emailAddressVerified": false,
                 "settings": {
                     "wantsEmailNotifications": false,
-                    "trackedTVShows": [] 
+                    "emailAddressVerified": false,
                 }
             }),
             ReturnConsumedCapacity: "TOTAL", 
