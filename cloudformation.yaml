@@ -249,7 +249,7 @@ Resources:
       - AttributeName: "emailAddress"
         KeyType: "HASH"
 
-  TvShowsTable:
+  TVShowsTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Ref TvShowsTableName
