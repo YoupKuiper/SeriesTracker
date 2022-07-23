@@ -249,7 +249,7 @@ Resources:
       - AttributeName: "emailAddress"
         KeyType: "HASH"
 
-  UsersTable:
+  TvShowsTable:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: !Ref TvShowsTableName
@@ -262,7 +262,7 @@ Resources:
       KeySchema:
       - AttributeName: "emailAddress"
         KeyType: "HASH"
-        
+
   ## MISCELLANEOUS
   ScheduledRule: 
     Type: AWS::Events::Rule
