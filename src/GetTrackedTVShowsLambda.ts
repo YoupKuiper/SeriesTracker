@@ -30,6 +30,8 @@ export const handler = async (event: any, context: any)=> {
             });
         }
 
+        console.log(`Found item: ${JSON.stringify(tvShows.Item)}`)
+
         return sendOKResponse(aws.DynamoDB.Converter.unmarshall(tvShows.Item).trackedTvShows)     
     } catch (error) {
         console.error(error)
