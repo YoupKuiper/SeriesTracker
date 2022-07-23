@@ -106,6 +106,56 @@ Resources:
           - LambdaIAMRole
           - Arn
 
+  GetTrackedTVShowsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: GetTrackedTVShowsLambda
+      Description: Lambda function for getting tracked TV shows for a user
+      Runtime: nodejs16.x
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: !Ref CodeZipFileName
+      Environment:
+        Variables:
+          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+          VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
+          USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+          JWT_SECRET: !Ref JWTSecret
+      Handler: GetTrackedTVShowsLambda.handler
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaIAMRole
+          - Arn
+
+  UpdateTrackedTVShowLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: UpdateTrackedTVShowLambda
+      Description: Lambda function for adding a tracked TV show for a user
+      Runtime: nodejs16.x
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: !Ref CodeZipFileName
+      Environment:
+        Variables:
+          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+          VERIFIED_EMAIL_ADDRESS: !Ref VerifiedEmailAddress
+          USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+          JWT_SECRET: !Ref JWTSecret
+      Handler: UpdateTrackedTVShowLambda.handler
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaIAMRole
+          - Arn
+
   LoginLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -191,6 +241,30 @@ Resources:
       ResourceId: !Ref ApiGatewayCreateAccountResource
       RestApiId: !Ref ApiGateway
 
+  ApiGatewayGetTrackedTVShowsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTrackedTVShowsLambda.Arn}/invocations
+      ResourceId: !Ref ApiGatewayCreateAccountResource
+      RestApiId: !Ref ApiGateway
+
+  ApiGatewayUpdateTrackedTVShowMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateTrackedTVShowLambda.Arn}/invocations
+      ResourceId: !Ref ApiGatewayCreateAccountResource
+      RestApiId: !Ref ApiGateway
+
   ApiGatewayUpdateUserMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -217,6 +291,20 @@ Resources:
       PathPart: CreateAccount
       RestApiId: !Ref ApiGateway
 
+  ApiGatewayGetTrackedTVShowsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: GetTrackedTVShows
+      RestApiId: !Ref ApiGateway
+
+  ApiGatewayUpdateTrackedTVShowResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt ApiGateway.RootResourceId
+      PathPart: UpdateTrackedTVShow
+      RestApiId: !Ref ApiGateway
+
   ApiGatewayUpdateUserResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
@@ -230,6 +318,8 @@ Resources:
       - ApiGatewayLoginMethod
       - ApiGatewayCreateAccountMethod
       - ApiGatewayUpdateUserMethod
+      - ApiGatewayGetTrackedTVShowsMethod
+      - ApiGatewayUpdateTrackedTVShowMethod
     Properties:
       RestApiId: !Ref ApiGateway
       StageName: !Ref ApiGatewayStageName
@@ -305,6 +395,22 @@ Resources:
       FunctionName: !GetAtt AccountCreationLambda.Arn
       Principal: apigateway.amazonaws.com          
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/CreateAccount
+
+  LambdaApiGatewayInvokeGetTrackedTVShows:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt GetTrackedTVShowsLambda.Arn
+      Principal: apigateway.amazonaws.com          
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/GetTrackedTVShows
+
+  LambdaApiGatewayInvokeUpdateTrackedTVShow:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt UpdateTrackedTVShowLambda.Arn
+      Principal: apigateway.amazonaws.com          
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/UpdateTrackedTVShow
 
   LambdaApiGatewayInvokeUpdateUser:
     Type: AWS::Lambda::Permission
