@@ -28,13 +28,14 @@ export const handler = async (event: any, context: any)=> {
     
         let prefix = "set ";
         // Prevent password to be updated, set default to prevent error when not passed
-        const { hashedPassword = {}, ...updateObjectWithoutPasswordHash } = parsedEvent.updateObject;
+        const { ...updateObjectWithoutPasswordHash } = parsedEvent.updateObject;
         console.log(`Update params: ${JSON.stringify(updateObjectWithoutPasswordHash)}`)
         let attributes = Object.keys(updateObjectWithoutPasswordHash);
         
         for (let i=0; i<attributes.length; i++) {
             let attribute = attributes[i];
-            if (attribute != idAttributeName) {
+            // Prevent emailAddress and password to be updated
+            if (attribute != idAttributeName && attribute != 'hashedPassword') {
                 params["UpdateExpression"] += prefix + "#" + attribute + " = :" + attribute;
                 params["ExpressionAttributeValues"][":" + attribute] = parsedEvent.updateObject[attribute];
                 params["ExpressionAttributeNames"]["#" + attribute] = attribute;
