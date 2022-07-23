@@ -48,9 +48,9 @@ export const handler = async (event: any, context: any)=> {
         console.log(`Params after running through loop ${JSON.stringify(params)}`)
     
         const updatedItem = await dynamoDB.updateItem(params).promise();
-
+        
         console.log(`Updated item: ${JSON.stringify(updatedItem)}`)
-        return sendOKResponse('User updated successfully!')
+        return sendOKResponse(aws.DynamoDB.Converter.unmarshall(updatedItem[0]))
 
     } catch (error) {
         console.error(error)
