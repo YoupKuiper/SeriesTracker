@@ -24,6 +24,7 @@ export const handler = async (event: any, context: any)=> {
         }).promise()
 
         if(!userDto.Item){
+            console.log(`Invalid credentials`)
             return sendErrorResponse('Invalid credentials');
         }
 
@@ -35,11 +36,13 @@ export const handler = async (event: any, context: any)=> {
             if(process.env.JWT_SECRET){
                 const token = signTokenFor(user.emailAddress)
                 
+                console.log(`Login successful`)
                 return sendOKResponse({ token, user });
             }
             throw new Error(`Environment variable for JWT secret required`);
         }
         
+        console.log(`Invalid credentials`)
         return sendErrorResponse('Invalid credentials');
     } catch (error) {
         console.error(error)
