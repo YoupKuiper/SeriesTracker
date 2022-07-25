@@ -308,6 +308,8 @@ Resources:
 
   OptionsMethodForCreateAccount:
     Type: AWS::ApiGateway::Method
+    DependsOn:
+      - ApiGatewayCreateAccountResource
     Properties:
       AuthorizationType: NONE
       RestApiId: !Ref ApiGateway
