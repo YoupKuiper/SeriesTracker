@@ -10,6 +10,7 @@ export const handler = async (event: any, context: any)=> {
 
     try {
 
+        const allEmailAddressesAndTrackedShows = await new DynamoDBClient().getAllEmailAddressesAndTrackedShows()
         const trackedTVShows = await new DynamoDBClient().getTVShowsByEmailAddress(process.env.VERIFIED_EMAIL_ADDRESS || '')
 
         if(!trackedTVShows){
