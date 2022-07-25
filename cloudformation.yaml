@@ -320,10 +320,10 @@ Resources:
       - ApiGatewayUpdateUserMethod
       - ApiGatewayGetTrackedTVShowsMethod
       - ApiGatewayUpdateTrackedTVShowMethod
-      - OptionsMethodForLogin
-      - OptionsMethodForCreateAccount
-      - OptionsMethodForUpdateTrackedTVShows
-      - OptionsMethodForGetTrackedTVShows
+      # - OptionsMethodForLogin
+      # - OptionsMethodForCreateAccount
+      # - OptionsMethodForUpdateTrackedTVShows
+      # - OptionsMethodForGetTrackedTVShows
     Properties:
       RestApiId: !Ref ApiGateway
       StageName: !Ref ApiGatewayStageName
