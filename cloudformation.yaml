@@ -342,8 +342,8 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
-      RestApiId: !Ref ApiGateway
       ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
+      RestApiId: !Ref ApiGateway
       HttpMethod: OPTIONS
       Integration:
         IntegrationResponses:
