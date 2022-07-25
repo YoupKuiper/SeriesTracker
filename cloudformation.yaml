@@ -281,10 +281,8 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
-      RestApiId:
-        Ref: ApiGateway
-      ResourceId:
-        Ref: ApiGatewayLoginResource
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayLoginResource
       HttpMethod: OPTIONS
       Integration:
         IntegrationResponses:
@@ -312,10 +310,8 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
-      RestApiId:
-        Ref: ApiGateway
-      ResourceId:
-        Ref: ApiGatewayCreateAccountResource
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayCreateAccountResource
       HttpMethod: OPTIONS
       Integration:
         IntegrationResponses:
@@ -343,10 +339,8 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
-      RestApiId:
-        Ref: ApiGateway
-      ResourceId:
-        Ref: ApiGatewayUpdateTrackedTVShowResource
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
       HttpMethod: OPTIONS
       Integration:
         IntegrationResponses:
@@ -374,10 +368,8 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
-      RestApiId:
-        Ref: ApiGateway
-      ResourceId:
-        Ref: ApiGatewayGetTrackedTVShowsResource
+      RestApiId: !Ref ApiGateway
+      ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
       HttpMethod: OPTIONS
       Integration:
         IntegrationResponses:
