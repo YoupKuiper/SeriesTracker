@@ -5,70 +5,82 @@ import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 const ses = new aws.SES({ region: process.env.AWS_REGION });
 
 
-export const handler = async (event: any, context: any)=> {
+export const handler = async (event: any, context: any) => {
   console.log(`Incoming event body: ${JSON.stringify(event.body)}`)
 
-    try {
+  try {
 
-        const allEmailAddressesAndTrackedShows = await new DynamoDBClient().getAllEmailAddressesAndTrackedShows()
-        const trackedTVShows = await new DynamoDBClient().getTVShowsByEmailAddress(process.env.VERIFIED_EMAIL_ADDRESS || '')
+    const allTrackedShowsForAllUsers = await new DynamoDBClient().getAllEmailAddressesAndTrackedShows()
 
-        if(!trackedTVShows){
-          return sendOKResponse('No tracked shows airing today')
-        }
+    if (!allTrackedShowsForAllUsers) {
+      return;
+    }
 
-        // Call movieDB to get todays airing tv shows
-        const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=1`);
+    const allTVShowsAiringToday = await getAllTVShowsAiringToday();
+    let promises: Promise<any>[] = []
 
-        let promises : Promise<any>[] = []
-        console.log(`Total pages of tv shows airing today: ${response.data.total_pages}`)
-
-        for (let pageNumber = 1; pageNumber < response.data.total_pages+1; pageNumber++){
-            promises.push(getTVShowsFor(pageNumber))
-        }
-
-        const allTVShowsAiringTodayPaged = await Promise.all(promises);
-        const allTVShowsAiringToday = Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
-
-        const trackedTVShowsAiringToday = trackedTVShows.filter((trackedShow) => allTVShowsAiringToday.find(airingToday => trackedShow.id === airingToday.id ));
-        
-        console.log(`Tracked tv shows found: ${JSON.stringify(trackedTVShowsAiringToday)}`)
-        if(!trackedTVShowsAiringToday){
-          return sendOKResponse('No tracked shows airing today')
-        }
-
-        let trackedTVShowsNames = '';
-        for (let [index, TVShow] of trackedTVShowsAiringToday.entries()) {
-          trackedTVShowsNames = index === trackedTVShowsAiringToday.length - 1 ? `${TVShow.name.toUpperCase()}` : `${TVShow.name.toUpperCase()}, `
-        }
-        // Send emails for every tracked TVShow thats airing today
-        var params = {
-            Destination: {
-              ToAddresses: [process.env.VERIFIED_EMAIL_ADDRESS || ''],
-            },
-            Message: {
-              Body: {
-                Text: { Data: `Maybe posters will be shown in this email at some point` },
-              },
-        
-              Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
-            },
-            Source: process.env.VERIFIED_EMAIL_ADDRESS || '',
-          };
-         
-          const sendEmailResponse = await ses.sendEmail(params).promise()
-          console.log(sendEmailResponse)
-
-          return sendOKResponse('Emails sent successfully')
-
-      } catch (error) {
-        console.error(error);
-        return sendErrorResponse('Failed to send email')
+    for (const user of allTrackedShowsForAllUsers) {
+      if (!user.trackedTVShows) {
+        continue;
       }
+
+      const trackedTVShowsAiringTodayForUser = user.trackedTVShows.filter((trackedShow) => allTVShowsAiringToday.find(airingToday => trackedShow.id === airingToday.id));
+      if (!trackedTVShowsAiringTodayForUser) {
+        continue;
+      }
+
+      let trackedTVShowsNames = '';
+      for (let [index, TVShow] of trackedTVShowsAiringTodayForUser.entries()) {
+        trackedTVShowsNames = index === trackedTVShowsAiringTodayForUser.length - 1 ? `${TVShow.name.toUpperCase()}` : `${TVShow.name.toUpperCase()}, `
+      }
+
+      promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames))
+    }
+
+    await Promise.allSettled(promises);
+
+    return sendOKResponse('Emails sent successfully')
+
+  } catch (error) {
+    console.error(error);
+    return sendErrorResponse('Failed to send email')
+  }
 };
 
 
 const getTVShowsFor = async (pageNumber: number) => {
-    const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=${pageNumber}`)
-    return response.data.results;
+  const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=${pageNumber}`)
+  return response.data.results;
+}
+
+const getAllTVShowsAiringToday = async () => {
+  // Call movieDB to get todays airing tv shows
+  const response = await axios.get(`https://api.themoviedb.org/3/tv/airing_today?api_key=${process.env.THE_MOVIE_DB_TOKEN}&language=en-US&page=1`);
+
+  let promises: Promise<any>[] = []
+  console.log(`Total pages of tv shows airing today: ${response.data.total_pages}`)
+
+  for (let pageNumber = 1; pageNumber < response.data.total_pages + 1; pageNumber++) {
+    promises.push(getTVShowsFor(pageNumber))
+  }
+
+  const allTVShowsAiringTodayPaged = await Promise.all(promises);
+  return Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
+}
+
+const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string) => {
+  const params = {
+    Destination: {
+      ToAddresses: [emailAddress],
+    },
+    Message: {
+      Body: {
+        Text: { Data: `Maybe posters will be shown in this email at some point` },
+      },
+
+      Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
+    },
+    Source: process.env.VERIFIED_EMAIL_ADDRESS || '',
+  };
+  await ses.sendEmail(params).promise()
 }
