@@ -1,11 +1,23 @@
 import aws from "aws-sdk";
-const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
+const docClient = new aws.DynamoDB.DocumentClient({region: process.env.AWS_REGION, apiVersion: '2012-08-10'});
+
 
 export class DynamoDBClient {
 
+    getAllEmailAddressesAndTrackedShows = async () => {
+        const response = await docClient.scan({ TableName: process.env.TV_SHOWS_TABLE_NAME || ''}).promise()
+        if(!response.Items){
+            console.error('NO TRACKED TV SHOWS FOUND AT ALL')
+        }
+
+        console.log(`RESPONSE: ${JSON.stringify(response.Items)}`)
+
+        return response.Items
+    }
+
     getTVShowsByEmailAddress = async (emailAddress: string) => {
         // Get TVShows from DynamoDB by EmailAddress
-        const tvShows = await dynamoDB.getItem({
+        const tvShows = await docClient.get({
             Key: aws.DynamoDB.Converter.marshall({
                 "emailAddress": emailAddress
             }),
@@ -17,7 +29,7 @@ export class DynamoDBClient {
             return []
         }
 
-        return aws.DynamoDB.Converter.unmarshall(tvShows.Item).trackedTVShows
+        return tvShows.Item.trackedTVShows
     }
 
     
