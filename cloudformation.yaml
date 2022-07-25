@@ -396,35 +396,35 @@ Resources:
   ApiGatewayLoginResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt ApiGateway.RootResourceId
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
       PathPart: Login
       RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayCreateAccountResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt ApiGateway.RootResourceId
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
       PathPart: CreateAccount
       RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayGetTrackedTVShowsResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt ApiGateway.RootResourceId
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
       PathPart: GetTrackedTVShows
       RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayUpdateTrackedTVShowResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt ApiGateway.RootResourceId
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
       PathPart: UpdateTrackedTVShow
       RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayUpdateUserResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
-      ParentId: !GetAtt ApiGateway.RootResourceId
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
       PathPart: UpdateUser
       RestApiId: !Ref TVShowTrackerApiGateway
 
