@@ -226,7 +226,7 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayLoginResource
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
 
   ApiGatewayCreateAccountMethod:
