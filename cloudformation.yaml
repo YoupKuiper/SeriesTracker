@@ -207,7 +207,7 @@ Resources:
           - Arn
 
   ## API GATEWAY
-  ApiGateway:
+  TVShowTrackerApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
       Description: API Gateway for TV Show Tracker
@@ -239,7 +239,7 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AccountCreationLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayCreateAccountResource
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayGetTrackedTVShowsMethod:
     Type: AWS::ApiGateway::Method
@@ -251,7 +251,7 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTrackedTVShowsLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayUpdateTrackedTVShowMethod:
     Type: AWS::ApiGateway::Method
@@ -263,7 +263,7 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateTrackedTVShowLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayUpdateUserMethod:
     Type: AWS::ApiGateway::Method
@@ -275,13 +275,13 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateUserRecordLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayUpdateUserResource
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   # OptionsMethodForLogin:
   #   Type: AWS::ApiGateway::Method
   #   Properties:
   #     AuthorizationType: NONE
-  #     RestApiId: !Ref ApiGateway
+  #     RestApiId: !Ref TVShowTrackerApiGateway
   #     ResourceId: !Ref ApiGatewayLoginResource
   #     HttpMethod: OPTIONS
   #     Integration:
@@ -308,12 +308,9 @@ Resources:
 
   # OptionsMethodForCreateAccount:
   #   Type: AWS::ApiGateway::Method
-  #   DependsOn:
-  #     - ApiGatewayCreateAccountResource
-  #     - ApiGateway
   #   Properties:
   #     AuthorizationType: NONE
-  #     RestApiId: !Ref ApiGateway
+  #     RestApiId: !Ref TVShowTrackerApiGateway
   #     ResourceId: !Ref ApiGatewayCreateAccountResource
   #     HttpMethod: OPTIONS
   #     Integration:
@@ -343,7 +340,7 @@ Resources:
   #   Properties:
   #     AuthorizationType: NONE
   #     ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
-  #     RestApiId: !Ref ApiGateway
+  #     RestApiId: !Ref TVShowTrackerApiGateway
   #     HttpMethod: OPTIONS
   #     Integration:
   #       IntegrationResponses:
@@ -371,7 +368,7 @@ Resources:
   #   Type: AWS::ApiGateway::Method
   #   Properties:
   #     AuthorizationType: NONE
-  #     RestApiId: !Ref ApiGateway
+  #     RestApiId: !Ref TVShowTrackerApiGateway
   #     ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
   #     HttpMethod: OPTIONS
   #     Integration:
@@ -401,35 +398,35 @@ Resources:
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: Login
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayCreateAccountResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: CreateAccount
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayGetTrackedTVShowsResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: GetTrackedTVShows
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayUpdateTrackedTVShowResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: UpdateTrackedTVShow
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayUpdateUserResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
       ParentId: !GetAtt ApiGateway.RootResourceId
       PathPart: UpdateUser
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
 
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -444,7 +441,7 @@ Resources:
       # - OptionsMethodForUpdateTrackedTVShows
       # - OptionsMethodForGetTrackedTVShows
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref TVShowTrackerApiGateway
       StageName: !Ref ApiGatewayStageName
 
   ## DYNAMO DB TABLES
@@ -509,7 +506,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt LoginLambda.Arn
       Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/Login
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/Login
 
   LambdaApiGatewayInvokeCreateAccount:
     Type: AWS::Lambda::Permission
@@ -517,7 +514,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt AccountCreationLambda.Arn
       Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/CreateAccount
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/CreateAccount
 
   LambdaApiGatewayInvokeGetTrackedTVShows:
     Type: AWS::Lambda::Permission
@@ -525,7 +522,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt GetTrackedTVShowsLambda.Arn
       Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/GetTrackedTVShows
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/GetTrackedTVShows
 
   LambdaApiGatewayInvokeUpdateTrackedTVShow:
     Type: AWS::Lambda::Permission
@@ -533,7 +530,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt UpdateTrackedTVShowLambda.Arn
       Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/UpdateTrackedTVShow
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateTrackedTVShow
 
   LambdaApiGatewayInvokeUpdateUser:
     Type: AWS::Lambda::Permission
@@ -541,4 +538,4 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !GetAtt UpdateUserRecordLambda.Arn
       Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*/*/UpdateUser
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateUser
