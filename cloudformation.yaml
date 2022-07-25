@@ -310,6 +310,7 @@ Resources:
     Type: AWS::ApiGateway::Method
     DependsOn:
       - ApiGatewayCreateAccountResource
+      - ApiGateway
     Properties:
       AuthorizationType: NONE
       RestApiId: !Ref ApiGateway
