@@ -281,6 +281,7 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
+      OperationName: OptionsMethodForLogin
       RestApiId:
         Ref: ApiGateway
       ResourceId:
@@ -312,6 +313,7 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
+      OperationName: OptionsMethodForCreateAccount
       RestApiId:
         Ref: ApiGateway
       ResourceId:
@@ -343,6 +345,7 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
+      OperationName: OptionsMethodForUpdateTrackedTVShows
       RestApiId:
         Ref: ApiGateway
       ResourceId:
@@ -374,6 +377,7 @@ Resources:
     Type: AWS::ApiGateway::Method
     Properties:
       AuthorizationType: NONE
+      OperationName: OptionsMethodForGetTrackedTVShows
       RestApiId:
         Ref: ApiGateway
       ResourceId:
