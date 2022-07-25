@@ -18,9 +18,7 @@ export class DynamoDBClient {
     getTVShowsByEmailAddress = async (emailAddress: string) => {
         // Get TVShows from DynamoDB by EmailAddress
         const tvShows = await docClient.get({
-            Key: aws.DynamoDB.Converter.marshall({
-                "emailAddress": emailAddress
-            }),
+            Key: { emailAddress },
             TableName: process.env.TV_SHOWS_TABLE_NAME || '',
         }).promise()
 
