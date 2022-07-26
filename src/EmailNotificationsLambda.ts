@@ -34,7 +34,9 @@ export const handler = async (event: any, context: any) => {
         trackedTVShowsNames = index === trackedTVShowsAiringTodayForUser.length - 1 ? `${TVShow.name.toUpperCase()}` : `${TVShow.name.toUpperCase()}, `
       }
 
-      promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames))
+      if(trackedTVShowsNames){
+        promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames))
+      }
     }
 
     await Promise.allSettled(promises);
