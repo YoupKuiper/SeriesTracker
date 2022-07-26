@@ -80,7 +80,7 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
 
       Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
     },
-    Source: process.env.VERIFIED_EMAIL_ADDRESS || '',
+    Source: emailAddress,
   };
   await ses.sendEmail(params).promise()
 }
