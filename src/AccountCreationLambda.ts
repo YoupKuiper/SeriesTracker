@@ -20,7 +20,7 @@ export const handler = async (event: any, context: any)=> {
                 "emailAddress":  parsedEvent.emailAddress,
                 "hashedPassword": hashedPassword,
                 "settings": {
-                    "wantsEmailNotifications": false,
+                    "wantsEmailNotifications": true,
                     "emailAddressVerified": false,
                 }
             }),
