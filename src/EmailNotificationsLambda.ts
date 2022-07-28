@@ -20,7 +20,7 @@ export const handler = async (event: any, context: any) => {
     let promises: Promise<any>[] = []
 
     for (const user of allTrackedShowsForAllUsers) {
-      if (!user.trackedTVShows) {
+      if (!user.trackedTVShows || !user.wantsEmailNotifications) {
         continue;
       }
 

@@ -17,18 +17,18 @@ export class DynamoDBClient {
 
     getTVShowsByEmailAddress = async (emailAddress: string) => {
         // Get TVShows from DynamoDB by EmailAddress
-        const tvShows = await docClient.get({
+        const { Item }  = await docClient.get({
             Key: { emailAddress },
             TableName: process.env.TV_SHOWS_TABLE_NAME || '',
         }).promise()
 
-        if(!tvShows.Item){
-            console.log(`No tv shows found, returning: ${JSON.stringify(tvShows.Item)}`)
-            // No TV shows found, return empty list
+        if(!Item){
+            // No record found, return empty list
+            console.log(`DB record not found`)
             return []
         }
 
-        return tvShows.Item.trackedTVShows
+        return Item.trackedTVShows
     }
 
     
