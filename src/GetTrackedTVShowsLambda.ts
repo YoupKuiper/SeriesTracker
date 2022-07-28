@@ -19,12 +19,14 @@ export const handler = async (event: any, context: any)=> {
         const trackedTVShows = await new DynamoDBClient().getTVShowsByEmailAddress(decodedToken.data.emailAddress)
 
         if(!trackedTVShows){
+            console.log(`No tv shows found, returning: ${JSON.stringify(trackedTVShows)}`)
             // No TV shows found, return empty list
             return sendOKResponse({
                 trackedTvShows: []
             });
         }
 
+        console.log(`Returning found tv shows: ${JSON.stringify(trackedTVShows)}`)
         return sendOKResponse(trackedTVShows)     
     } catch (error) {
         console.error(error)

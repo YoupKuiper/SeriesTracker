@@ -22,8 +22,8 @@ export class DynamoDBClient {
             TableName: process.env.TV_SHOWS_TABLE_NAME || '',
         }).promise()
 
-        console.log(JSON.stringify(tvShows))
         if(!tvShows.Item){
+            console.log(`No tv shows found, returning: ${JSON.stringify(tvShows.Item)}`)
             // No TV shows found, return empty list
             return []
         }
