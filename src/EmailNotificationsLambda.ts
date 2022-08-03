@@ -17,6 +17,7 @@ export const handler = async (event: any, context: any) => {
     }
 
     const allTVShowsAiringToday = await getAllTVShowsAiringToday();
+    console.log(`All airing: ${allTVShowsAiringToday}`)
     let promises: Promise<any>[] = []
 
     for (const user of allTrackedShowsForAllUsers) {
@@ -35,6 +36,7 @@ export const handler = async (event: any, context: any) => {
       }
 
       if(trackedTVShowsNames){
+        console.log(`Pushing task to send email to: ${user.emailAddress} for airing shows: ${trackedTVShowsNames}`)
         promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames))
       }
     }
