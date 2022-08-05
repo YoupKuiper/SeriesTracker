@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt'
+const bcrypt = require("bcryptjs");
 
 export const createPasswordHash = async (plainTextPassword: string) => {
     return await bcrypt.hash(plainTextPassword, 10)
