@@ -82,7 +82,7 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
         Text: { Data: `Maybe posters will be shown in this email at some point` },
       },
 
-      Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
+      Subject: { Data: `Airing today: ${JSON.stringify(trackedTVShowsNames)}` },
     },
     Source: emailAddress,
   };
