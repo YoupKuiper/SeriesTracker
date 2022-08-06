@@ -52,7 +52,7 @@ jobs:
           parameter-overrides: >-
             ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }},
             TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }},
-            VerifiedEmailAddress=${{ secrets.VERIFIED_EMAIL_ADDRESS }},
+            FromEmailAddress=${{ secrets.FROM_EMAIL_ADDRESS }},
             CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }},
             UserTableName=${{ env.USER_TABLE_NAME }},
             TvShowsTableName=${{ env.TV_SHOWS_TABLE_NAME }},

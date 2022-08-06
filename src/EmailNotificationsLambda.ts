@@ -73,6 +73,10 @@ const getAllTVShowsAiringToday = async () => {
 }
 
 const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string) => {
+  if(!process.env.FROM_EMAIL_ADDRESS){
+    console.error('From email address was not set')
+    return sendErrorResponse('From email address was not set')
+  }
   const params = {
     Destination: {
       ToAddresses: [emailAddress],
@@ -84,7 +88,7 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
 
       Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
     },
-    Source: emailAddress,
+    Source: process.env.FROM_EMAIL_ADDRESS,
   };
   await ses.sendEmail(params).promise()
 }
