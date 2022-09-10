@@ -6,6 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "local:email": "ts-node ./local/testEmailNotificationLambdaLocal.ts",
+    "local:search": "ts-node ./local/testSearchTVShowsLambdaLocal.ts",
     "build": "tsc"
   },
   "keywords": [],

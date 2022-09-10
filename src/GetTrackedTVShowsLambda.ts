@@ -2,6 +2,7 @@ import aws from "aws-sdk";
 import { DynamoDBClient } from "./DynamoDBClient";
 import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 import { isValid } from "./lib/tokenHelper";
+import jwt from 'jsonwebtoken';
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
 export const handler = async (event: any, context: any)=> {
@@ -30,7 +31,10 @@ export const handler = async (event: any, context: any)=> {
         return sendOKResponse(trackedTVShows)     
     } catch (error) {
         console.error(error)
-        return sendErrorResponse('Failed log in user')
+        if(error instanceof jwt.TokenExpiredError) {
+            return sendErrorResponse('Failed log in user')
+        }
+        return sendErrorResponse('Failed to get tracked TV Shows')
     }
 
 }
