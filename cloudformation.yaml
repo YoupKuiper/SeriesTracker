@@ -156,6 +156,31 @@ Resources:
           - LambdaIAMRole
           - Arn
 
+  SearchTVShowsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: SearchTVShowsLambda
+      Description: Getting popular or searched tv shows from themoviedb
+      Runtime: nodejs16.x
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: !Ref CodeZipFileName
+      Environment:
+        Variables:
+          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+          USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+          JWT_SECRET: !Ref JWTSecret
+      Handler: SearchTVShowsLambda.handler
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaIAMRole
+          - Arn
+
   LoginLambda:
     Type: AWS::Lambda::Function
     Properties:
@@ -265,6 +290,18 @@ Resources:
       ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
       RestApiId: !Ref TVShowTrackerApiGateway
 
+  ApiGatewaySearchTVShowsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SearchTVShowsLambda.Arn}/invocations
+      ResourceId: !Ref ApiGatewaySearchTVShowsResource
+      RestApiId: !Ref TVShowTrackerApiGateway
+
   ApiGatewayUpdateUserMethod:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -364,6 +401,35 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: false
             method.response.header.Access-Control-Allow-Origin: false
 
+  OptionsMethodForSearchTVShows:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      ResourceId: !Ref ApiGatewaySearchTVShowsResource
+      RestApiId: !Ref TVShowTrackerApiGateway
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
   OptionsMethodForGetTrackedTVShows:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -421,6 +487,13 @@ Resources:
       PathPart: UpdateTrackedTVShow
       RestApiId: !Ref TVShowTrackerApiGateway
 
+  ApiGatewaySearchTVShowsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+      PathPart: SearchTVShows
+      RestApiId: !Ref TVShowTrackerApiGateway
+
   ApiGatewayUpdateUserResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
@@ -436,10 +509,12 @@ Resources:
       - ApiGatewayUpdateUserMethod
       - ApiGatewayGetTrackedTVShowsMethod
       - ApiGatewayUpdateTrackedTVShowMethod
+      - ApiGatewaySearchTVShowsMethod
       - OptionsMethodForLogin
       - OptionsMethodForCreateAccount
       - OptionsMethodForUpdateTrackedTVShows
       - OptionsMethodForGetTrackedTVShows
+      - OptionsMethodForSearchTVShows
     Properties:
       RestApiId: !Ref TVShowTrackerApiGateway
       StageName: !Ref ApiGatewayStageName
@@ -531,6 +606,14 @@ Resources:
       FunctionName: !GetAtt UpdateTrackedTVShowLambda.Arn
       Principal: apigateway.amazonaws.com          
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateTrackedTVShow
+
+  LambdaApiGatewayInvokeSearchTVShows:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt SearchTVShowsLambda.Arn
+      Principal: apigateway.amazonaws.com          
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/SearchTVShows
 
   LambdaApiGatewayInvokeUpdateUser:
     Type: AWS::Lambda::Permission
