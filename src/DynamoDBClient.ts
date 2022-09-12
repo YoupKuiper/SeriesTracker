@@ -35,7 +35,7 @@ export class DynamoDBClient {
     getAlreadySentNotificationIds = async () => {
         // Get already sent notification record from DynamoDB by EmailAddress
         const { Item } = await docClient.get({
-            Key: { ALREADY_SENT_NOTIFICATIONS_RECORD_ID },
+            Key: { emailAddress: ALREADY_SENT_NOTIFICATIONS_RECORD_ID },
             TableName: process.env.TV_SHOWS_TABLE_NAME || '',
         }).promise()
 
