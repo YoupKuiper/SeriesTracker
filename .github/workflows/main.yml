@@ -11,7 +11,7 @@ jobs:
       USER_TABLE_NAME: UserTable
       TV_SHOWS_TABLE_NAME: TVShowsTable
       API_GATEWAY_NAME: TVShowTrackerAPI
-      NOTIFICATIONS_SENT_TABLE_NAME: NotificationsSentTable
+      
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
@@ -58,5 +58,4 @@ jobs:
             UserTableName=${{ env.USER_TABLE_NAME }},
             TvShowsTableName=${{ env.TV_SHOWS_TABLE_NAME }},
             JWTSecret=${{ secrets.JWT_SECRET }},
-            APIGatewayName=${{ env.API_GATEWAY_NAME }},
-            NotificationsSentTableName=${{ env.NOTIFICATIONS_SENT_TABLE_NAME }}
+            APIGatewayName=${{ env.API_GATEWAY_NAME }}

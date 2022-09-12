@@ -19,9 +19,6 @@ Parameters:
   TvShowsTableName:
     Type: String
     Description: Name of DynamoDB table that holds tv shows
-  NotificationsSentTableName:
-    Type: String
-    Description: Name of DynamoDB table that keeps track of notifications that are already sent
   JWTSecret:
     Type: String
     Description: Secret used for signing JWT token
@@ -549,20 +546,6 @@ Resources:
         AttributeType: "S"
       KeySchema:
       - AttributeName: "emailAddress"
-        KeyType: "HASH"
-
-  NotificationsSentTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Ref NotificationsSentTableName
-      ProvisionedThroughput: 
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      AttributeDefinitions:
-      - AttributeName: "ids"
-        AttributeType: "S"
-      KeySchema:
-      - AttributeName: "ids"
         KeyType: "HASH"
 
   ## MISCELLANEOUS

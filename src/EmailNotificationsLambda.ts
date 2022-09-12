@@ -10,14 +10,22 @@ export const handler = async (event: any, context: any) => {
 
   try {
 
-    const allTrackedShowsForAllUsers = await new DynamoDBClient().getAllEmailAddressesAndTrackedShows()
+    const dynamoDBClient = new DynamoDBClient()
+    const allTrackedShowsForAllUsers = await dynamoDBClient.getAllEmailAddressesAndTrackedShows()
+    
+    // Get shows that notifications have already been sent for, 
+    const alreadySentNotificationIds = await dynamoDBClient.getAlreadySentNotificationIds()
+    console.log(`Already sent notifications: JSON.stringify(alreadySentNotificationIds)`)
 
     if (!allTrackedShowsForAllUsers) {
       return;
     }
 
     const allTVShowsAiringToday = await getAllTVShowsAiringToday();
-    console.log(`All airing: ${JSON.stringify(allTVShowsAiringToday)}`)
+    const allTVShowsAiringTodayNotNotifiedYet = allTVShowsAiringToday.filter((trackedShow) => !alreadySentNotificationIds.includes(trackedShow.id))
+    console.log(`All airing not notified yet: ${JSON.stringify(allTVShowsAiringTodayNotNotifiedYet)}`)
+
+    const allNotifiedIds: number[] = [];
     let promises: Promise<any>[] = []
 
     for (const user of allTrackedShowsForAllUsers) {
@@ -25,13 +33,14 @@ export const handler = async (event: any, context: any) => {
         continue;
       }
 
-      const trackedTVShowsAiringTodayForUser = user.trackedTVShows.filter((trackedShow) => allTVShowsAiringToday.find(airingToday => trackedShow.id === airingToday.id));
+      const trackedTVShowsAiringTodayForUser = user.trackedTVShows.filter((trackedShow) => allTVShowsAiringTodayNotNotifiedYet.find(airingToday => trackedShow.id === airingToday.id));
       if (!trackedTVShowsAiringTodayForUser) {
         continue;
       }
 
       let trackedTVShowsNames = '';
       for (let [index, TVShow] of trackedTVShowsAiringTodayForUser.entries()) {
+        allNotifiedIds.push(TVShow.id)
         trackedTVShowsNames = index === trackedTVShowsAiringTodayForUser.length - 1 ? `${TVShow.name.toUpperCase()}` : `${TVShow.name.toUpperCase()}, `
       }
 
@@ -40,6 +49,10 @@ export const handler = async (event: any, context: any) => {
         promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames))
       }
     }
+
+    alreadySentNotificationIds ? 
+      promises.push(dynamoDBClient.putAlreadySentNotificationIds(allNotifiedIds)) : 
+      promises.push(dynamoDBClient.putAlreadySentNotificationIds([]))
 
     await Promise.allSettled(promises);
 
