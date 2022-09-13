@@ -15,7 +15,7 @@ export const handler = async (event: any, context: any) => {
     
     // Get shows that notifications have already been sent for, 
     const alreadySentNotificationIds = await dynamoDBClient.getAlreadySentNotificationIds()
-    console.log(`Already sent notifications: JSON.stringify(alreadySentNotificationIds)`)
+    console.log(`Already sent notifications: ${JSON.stringify(alreadySentNotificationIds)}`)
 
     if (!allTrackedShowsForAllUsers) {
       return;
