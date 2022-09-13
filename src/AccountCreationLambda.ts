@@ -17,7 +17,7 @@ export const handler = async (event: any, context: any)=> {
         // Save unverified user to dynamodb
         const record = {
             Item: aws.DynamoDB.Converter.marshall({
-                "emailAddress":  parsedEvent.emailAddress,
+                "emailAddress":  parsedEvent.emailAddress.toLowerCase(),
                 "hashedPassword": hashedPassword,
                 "settings": {
                     "wantsEmailNotifications": true,
