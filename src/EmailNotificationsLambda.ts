@@ -13,7 +13,9 @@ export const handler = async (event: any, context: any) => {
 
     if(event.debug){
       console.log('debugging..')
-      return sendEmailNotificationTo('youpkuiper@gmail.com', 'HOUSE OF THE DRAGON', true)
+      return sendEmailNotificationTo('youpkuiper@gmail.com', 
+      'HOUSE OF THE DRAGON, SOUTH PARK', 
+      `<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">&nbsp;<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">`, true)
     }
     const dynamoDBClient = new DynamoDBClient()
     const allTrackedShowsForAllUsers = await dynamoDBClient.getAllEmailAddressesAndTrackedShows()
@@ -44,16 +46,19 @@ export const handler = async (event: any, context: any) => {
       }
 
       let trackedTVShowsNames = '';
+      let trackedTVShowsPosters = '';
       for (let [index, TVShow] of trackedTVShowsAiringTodayForUser.entries()) {
         allNotifiedIds.push(TVShow.id)
-        trackedTVShowsNames = index === trackedTVShowsAiringTodayForUser.length - 1 ? `${TVShow.name.toUpperCase()}` : `${TVShow.name.toUpperCase()}, `
+        const tvShowName = TVShow.name.toUpperCase()
+        trackedTVShowsNames += index === trackedTVShowsAiringTodayForUser.length - 1 ? `AND ${tvShowName}` : `${tvShowName}, `
+        trackedTVShowsPosters += `<img src="https://image.tmdb.org/t/p/w300${TVShow.poster_path}" alt="${tvShowName}">&nbsp;`
       }
 
       if (trackedTVShowsNames) {
         console.log(`Pushing task to send email to: ${user.emailAddress} for airing shows: ${trackedTVShowsNames}`)
-        promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames))
+        promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames, trackedTVShowsPosters))
       }
-    }``
+    }
 
     alreadySentNotificationIds ?
       promises.push(dynamoDBClient.putAlreadySentNotificationIds(allNotifiedIds)) :
@@ -90,15 +95,15 @@ const getAllTVShowsAiringToday = async () => {
   return Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
 }
 
-const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string, debug: boolean = false) => {
+const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string, trackedTVShowsPostersHTML: string, debug: boolean = false) => {
   if (!process.env.FROM_EMAIL_ADDRESS) {
     console.error('From email address was not set')
     return sendErrorResponse('From email address was not set')
   }
 
-
-
-  const htmlEmail = fs.readFileSync(__dirname+'/email-template.html').toString().replace(/{TVSHOWNAME}/gi, trackedTVShowsNames).replace('{POSTERPATH}', 'z2yahl2uefxDCl0nogcRBstwruJ.jpg');
+  const htmlEmail = fs.readFileSync(__dirname+'/email-template.html').toString()
+    .replace(/{TVSHOWNAMES}/gi, trackedTVShowsNames)
+    .replace('{POSTERS}', trackedTVShowsPostersHTML);
   const params = {
     Destination: {
       ToAddresses: [emailAddress],
