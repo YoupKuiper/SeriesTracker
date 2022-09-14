@@ -96,11 +96,9 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
     return sendErrorResponse('From email address was not set')
   }
 
-  if(debug){
-    const ses = new aws.SES({ region: process.env.AWS_REGION });
-  }
 
-  const htmlEmail = fs.readFileSync('email-template.html').toString().replace(/{TVSHOWNAME}/gi, trackedTVShowsNames).replace('{POSTERPATH}', 'z2yahl2uefxDCl0nogcRBstwruJ.jpg');
+
+  const htmlEmail = fs.readFileSync(__dirname+'/email-template.html').toString().replace(/{TVSHOWNAME}/gi, trackedTVShowsNames).replace('{POSTERPATH}', 'z2yahl2uefxDCl0nogcRBstwruJ.jpg');
   const params = {
     Destination: {
       ToAddresses: [emailAddress],
@@ -116,5 +114,9 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
     },
     Source: process.env.FROM_EMAIL_ADDRESS,
   };
+  if(debug){
+    const ses = new aws.SES({ region: process.env.AWS_REGION });
+    return await ses.sendEmail(params).promise()
+  }
   await ses.sendEmail(params).promise()
 }
