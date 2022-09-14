@@ -1,5 +1,6 @@
 const axios = require('axios').default;
 import aws from "aws-sdk";
+import fs from 'fs';
 import { DynamoDBClient } from "./DynamoDBClient";
 import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 const ses = new aws.SES({ region: process.env.AWS_REGION });
@@ -10,9 +11,13 @@ export const handler = async (event: any, context: any) => {
 
   try {
 
+    if(event.debug){
+      console.log('debugging..')
+      return sendEmailNotificationTo('youpkuiper@gmail.com', 'HOUSE OF THE DRAGON', true)
+    }
     const dynamoDBClient = new DynamoDBClient()
     const allTrackedShowsForAllUsers = await dynamoDBClient.getAllEmailAddressesAndTrackedShows()
-    
+
     // Get shows that notifications have already been sent for, 
     const alreadySentNotificationIds = await dynamoDBClient.getAlreadySentNotificationIds()
     console.log(`Already sent notifications: ${JSON.stringify(alreadySentNotificationIds)}`)
@@ -44,14 +49,14 @@ export const handler = async (event: any, context: any) => {
         trackedTVShowsNames = index === trackedTVShowsAiringTodayForUser.length - 1 ? `${TVShow.name.toUpperCase()}` : `${TVShow.name.toUpperCase()}, `
       }
 
-      if(trackedTVShowsNames){
+      if (trackedTVShowsNames) {
         console.log(`Pushing task to send email to: ${user.emailAddress} for airing shows: ${trackedTVShowsNames}`)
         promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames))
       }
-    }
+    }``
 
-    alreadySentNotificationIds ? 
-      promises.push(dynamoDBClient.putAlreadySentNotificationIds(allNotifiedIds)) : 
+    alreadySentNotificationIds ?
+      promises.push(dynamoDBClient.putAlreadySentNotificationIds(allNotifiedIds)) :
       promises.push(dynamoDBClient.putAlreadySentNotificationIds([]))
 
     await Promise.allSettled(promises);
@@ -85,11 +90,17 @@ const getAllTVShowsAiringToday = async () => {
   return Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
 }
 
-const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string) => {
-  if(!process.env.FROM_EMAIL_ADDRESS){
+const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string, debug: boolean = false) => {
+  if (!process.env.FROM_EMAIL_ADDRESS) {
     console.error('From email address was not set')
     return sendErrorResponse('From email address was not set')
   }
+
+  if(debug){
+    const ses = new aws.SES({ region: process.env.AWS_REGION });
+  }
+
+  const htmlEmail = fs.readFileSync('email-template.html').toString().replace(/{TVSHOWNAME}/gi, trackedTVShowsNames).replace('{POSTERPATH}', 'z2yahl2uefxDCl0nogcRBstwruJ.jpg');
   const params = {
     Destination: {
       ToAddresses: [emailAddress],
@@ -97,8 +108,10 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
     Message: {
       Body: {
         Text: { Data: `Maybe posters will be shown in this email at some point` },
+        Html: {
+          Data: htmlEmail
+        },
       },
-
       Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
     },
     Source: process.env.FROM_EMAIL_ADDRESS,

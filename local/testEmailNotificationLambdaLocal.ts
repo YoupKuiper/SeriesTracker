@@ -1,4 +1,4 @@
 import { handler } from '../src/EmailNotificationsLambda'
 import 'dotenv/config'
 
-handler({}, {})
+handler({debug:true}, {})
