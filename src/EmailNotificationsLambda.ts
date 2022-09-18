@@ -108,7 +108,7 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
     .replace('{POSTERS}', trackedTVShowsPostersHTML)
     .replace('{EMAILADDRESS}', emailAddress)
     .replace('{UNSUBSCRIBETOKEN}', unsubscribeToken)
-    
+
   const params = {
     Destination: {
       ToAddresses: [emailAddress],
@@ -124,9 +124,5 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
     },
     Source: process.env.FROM_EMAIL_ADDRESS,
   };
-  if(debug){
-    const ses = new aws.SES({ region: process.env.AWS_REGION });
-    return await ses.sendEmail(params).promise()
-  }
   await ses.sendEmail(params).promise()
 }

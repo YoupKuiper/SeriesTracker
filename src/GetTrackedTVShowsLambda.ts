@@ -22,9 +22,7 @@ export const handler = async (event: any, context: any)=> {
         if(!trackedTVShows){
             console.log(`No tv shows found, returning: ${JSON.stringify(trackedTVShows)}`)
             // No TV shows found, return empty list
-            return sendOKResponse({
-                trackedTvShows: []
-            });
+            return sendOKResponse([]);
         }
 
         console.log(`Returning found tv shows: ${JSON.stringify(trackedTVShows)}`)
