@@ -53,7 +53,7 @@ export const handler = async (event: any, context: any)=> {
         
         const parsedUser = aws.DynamoDB.Converter.unmarshall(updatedUser.Attributes || {});
         console.log(JSON.stringify(parsedUser));
-        const { hashedPassword, ...userWithoutPassword } = parsedUser;
+        const { hashedPassword, unsubscribeEmailToken, ...userWithoutPassword } = parsedUser;
         
         
         console.log(`Updated item: ${JSON.stringify(userWithoutPassword)}`)
