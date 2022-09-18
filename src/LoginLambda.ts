@@ -20,7 +20,7 @@ export const handler = async (event: any, context: any)=> {
             Key: aws.DynamoDB.Converter.marshall({
                 "emailAddress": emailAddress
             }),
-            TableName: process.env.USER_TABLE_NAME || '',
+            TableName: process.env.TV_SHOWS_TABLE_NAME || '',
         }).promise()
 
         if(!userDto.Item){

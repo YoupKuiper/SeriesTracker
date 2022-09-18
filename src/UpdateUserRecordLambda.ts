@@ -15,7 +15,7 @@ export const handler = async (event: any, context: any)=> {
         
         // If valid user record data, put to DB
         let params = {
-            TableName: process.env.USER_TABLE_NAME || '',
+            TableName: process.env.TV_SHOWS_TABLE_NAME || '',
             Key: {},
             ExpressionAttributeValues: {},
             ExpressionAttributeNames: {},

@@ -15,10 +15,12 @@ export const handler = async (event: any, context: any) => {
       console.log('debugging..')
       return sendEmailNotificationTo('youpkuiper@gmail.com', 
       'HOUSE OF THE DRAGON, SOUTH PARK', 
-      `<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">&nbsp;<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">`, true)
+      `<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">&nbsp;<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">`, 
+      'unsubscribetoken',
+      true)
     }
     const dynamoDBClient = new DynamoDBClient()
-    const allTrackedShowsForAllUsers = await dynamoDBClient.getAllEmailAddressesAndTrackedShows()
+    const allTrackedShowsForAllUsers = await dynamoDBClient.getAllUsersAndTrackedShows()
 
     // Get shows that notifications have already been sent for, 
     const alreadySentNotificationIds = await dynamoDBClient.getAlreadySentNotificationIds()
@@ -36,7 +38,7 @@ export const handler = async (event: any, context: any) => {
     let promises: Promise<any>[] = []
 
     for (const user of allTrackedShowsForAllUsers) {
-      if (!user.trackedTVShows) {
+      if (!user.trackedTVShows || !user.settings.wantsEmailNotifications) {
         continue;
       }
 
@@ -56,7 +58,7 @@ export const handler = async (event: any, context: any) => {
 
       if (trackedTVShowsNames) {
         console.log(`Pushing task to send email to: ${user.emailAddress} for airing shows: ${trackedTVShowsNames}`)
-        promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames, trackedTVShowsPosters))
+        promises.push(sendEmailNotificationTo(user.emailAddress, trackedTVShowsNames, trackedTVShowsPosters, user.unsubscribeEmailToken))
       }
     }
 
@@ -95,7 +97,7 @@ const getAllTVShowsAiringToday = async () => {
   return Array.prototype.concat.apply([], allTVShowsAiringTodayPaged);
 }
 
-const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string, trackedTVShowsPostersHTML: string, debug: boolean = false) => {
+const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames: string, trackedTVShowsPostersHTML: string, unsubscribeToken: string, debug: boolean = false) => {
   if (!process.env.FROM_EMAIL_ADDRESS) {
     console.error('From email address was not set')
     return sendErrorResponse('From email address was not set')
@@ -103,7 +105,10 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
 
   const htmlEmail = fs.readFileSync(__dirname+'/email-template.html').toString()
     .replace(/{TVSHOWNAMES}/gi, trackedTVShowsNames)
-    .replace('{POSTERS}', trackedTVShowsPostersHTML);
+    .replace('{POSTERS}', trackedTVShowsPostersHTML)
+    .replace('{EMAILADDRESS}', emailAddress)
+    .replace('{UNSUBSCRIBETOKEN}', unsubscribeToken)
+    
   const params = {
     Destination: {
       ToAddresses: [emailAddress],

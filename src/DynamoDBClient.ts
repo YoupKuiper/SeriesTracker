@@ -5,7 +5,15 @@ const ALREADY_SENT_NOTIFICATIONS_RECORD_ID = 'ALREADY_SENT_NOTIFICATIONS_RECORD'
 
 export class DynamoDBClient {
 
-    getAllEmailAddressesAndTrackedShows = async () => {
+    createUserAccount = async (user) => {
+        await docClient.put({
+            Item: user,
+            TableName: process.env.TV_SHOWS_TABLE_NAME || '',
+            ConditionExpression: 'attribute_not_exists(emailAddress)'
+        }).promise()
+    }
+
+    getAllUsersAndTrackedShows = async () => {
         const response = await docClient.scan({ TableName: process.env.TV_SHOWS_TABLE_NAME || '' }).promise()
         if (!response.Items) {
             console.error('NO TRACKED TV SHOWS FOUND AT ALL')
