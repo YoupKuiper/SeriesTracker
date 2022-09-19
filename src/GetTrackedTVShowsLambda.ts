@@ -25,7 +25,7 @@ export const handler = async (event: any, context: any)=> {
             return sendOKResponse([]);
         }
 
-        console.log(`Returning found tv shows: ${JSON.stringify(!user.trackedTVShows)}`)
+        console.log(`Returning found tv shows: ${JSON.stringify(user.trackedTVShows)}`)
         return sendOKResponse(!user.trackedTVShows)     
     } catch (error) {
         console.error(error)
