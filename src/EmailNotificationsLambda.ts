@@ -13,10 +13,10 @@ export const handler = async (event: any, context: any) => {
 
     if(event.debug){
       console.log('debugging..')
-      return sendEmailNotificationTo('youpkuiper@gmail.com', 
+      return sendEmailNotificationTo('youp_feyenoord@hotmail.com', 
       'HOUSE OF THE DRAGON, SOUTH PARK', 
       `<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">&nbsp;<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">`, 
-      'unsubscribetoken',
+      'N2pPg4o/HVzSCzyp0N25h',
       true)
     }
     const dynamoDBClient = new DynamoDBClient()
@@ -108,6 +108,8 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
     .replace('{POSTERS}', trackedTVShowsPostersHTML)
     .replace('{EMAILADDRESS}', encodeURIComponent(emailAddress))
     .replace('{UNSUBSCRIBETOKEN}', encodeURIComponent(unsubscribeToken))
+
+  console.log(`Email after replacements: ${htmlEmail}`)
 
   const params = {
     Destination: {

@@ -28,7 +28,7 @@ export const handler = async (event: any, context: any)=> {
             return sendErrorResponse('Invalid credentials');
         }
 
-        const { hashedPassword, ...user } = aws.DynamoDB.Converter.unmarshall(userDto.Item)
+        const { hashedPassword, unsubscribeEmailToken, ...user } = aws.DynamoDB.Converter.unmarshall(userDto.Item)
 
         // Check if password is correct
         if(await isCorrectPassword(password, hashedPassword)){
