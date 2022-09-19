@@ -34,7 +34,7 @@ export const handler = async (event: any, context: any)=> {
         if(await isCorrectPassword(password, hashedPassword)){
             // Endcode a JWT token and return
             if(process.env.JWT_SECRET){
-                const token = signTokenFor(user.emailAddress)
+                const token = signTokenFor(user.emailAddress, user.settings)
                 
                 console.log(`Login successful`)
                 return sendOKResponse({ token, user });

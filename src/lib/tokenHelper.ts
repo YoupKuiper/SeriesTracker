@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-export const signTokenFor = (emailAddress: string) => {
+export const signTokenFor = (emailAddress: string, settings: any) => {
     if(process.env.JWT_SECRET){
         return jwt.sign({
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7), //expire after 1 week
-            data: { emailAddress: emailAddress },
+            data: { emailAddress: emailAddress, settings },
             iat: Math.floor(Date.now() / 1000)
           }, process.env.JWT_SECRET);    
     }
