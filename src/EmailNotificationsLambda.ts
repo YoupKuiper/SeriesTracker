@@ -106,8 +106,8 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
   const htmlEmail = fs.readFileSync(__dirname+'/email-template.html').toString()
     .replace(/{TVSHOWNAMES}/gi, trackedTVShowsNames)
     .replace('{POSTERS}', trackedTVShowsPostersHTML)
-    .replace('{EMAILADDRESS}', emailAddress)
-    .replace('{UNSUBSCRIBETOKEN}', unsubscribeToken)
+    .replace('{EMAILADDRESS}', encodeURIComponent(emailAddress))
+    .replace('{UNSUBSCRIBETOKEN}', encodeURIComponent(unsubscribeToken))
 
   const params = {
     Destination: {
