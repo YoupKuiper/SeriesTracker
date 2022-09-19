@@ -26,7 +26,7 @@ export const handler = async (event: any, context: any)=> {
         }
 
         console.log(`Returning found tv shows: ${JSON.stringify(user.trackedTVShows)}`)
-        return sendOKResponse(!user.trackedTVShows)     
+        return sendOKResponse(user.trackedTVShows)     
     } catch (error) {
         console.error(error)
         if(error instanceof jwt.TokenExpiredError) {
