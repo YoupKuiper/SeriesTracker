@@ -15,7 +15,7 @@ export const handler = async (event: any, context: any)=> {
         // Check if token is valid
         const decodedToken = isValid(token);
         
-        // Get TVShows from DynamoDB by EmailAddress
+        // TODO: Prevent this from overwriting user data, use update?
         await dynamoDB.putItem({
             Item: aws.DynamoDB.Converter.marshall({
                 "emailAddress": decodedToken.data.emailAddress,

@@ -1,24 +1,28 @@
 export const sendOKResponse = (responseBody: any) => {
-    return {
-        statusCode: 200,
-        headers: {
-          "Access-Control-Allow-Headers" : "Content-Type",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
-        },
-        body: JSON.stringify(responseBody)
-      }
+    const returnObject = {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Headers" : "Content-Type",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+      },
+      body: JSON.stringify(responseBody)
+    }
+    console.log(`Returning: ${JSON.stringify(returnObject)}`)
+    return returnObject
 }
 
 export const sendErrorResponse = (responseBody: any) => {
-    return {
-        statusCode: 400,
-        headers: {
-          "Access-Control-Allow-Headers" : "Content-Type",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
-        },
-        body: JSON.stringify(responseBody)
-      }
+    const returnObject = {
+      statusCode: 400,
+      headers: {
+        "Access-Control-Allow-Headers" : "Content-Type",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+      },
+      body: JSON.stringify(responseBody)
+    }
+    console.log(`Returning: ${JSON.stringify(returnObject)}`)
+    return returnObject
 }
 
