@@ -17,16 +17,16 @@ export const handler = async (event: any, context: any)=> {
         // Check if token is valid
         const decodedToken = isValid(token);
         
-        const trackedTVShows = await new DynamoDBClient().getTVShowsByEmailAddress(decodedToken.data.emailAddress)
+        const user = await new DynamoDBClient().getUserByEmailAddress(decodedToken.data.emailAddress)
 
-        if(!trackedTVShows){
-            console.log(`No tv shows found, returning: ${JSON.stringify(trackedTVShows)}`)
+        if(!user.trackedTVShows){
+            console.log(`No tv shows found, returning: []}`)
             // No TV shows found, return empty list
             return sendOKResponse([]);
         }
 
-        console.log(`Returning found tv shows: ${JSON.stringify(trackedTVShows)}`)
-        return sendOKResponse(trackedTVShows)     
+        console.log(`Returning found tv shows: ${JSON.stringify(!user.trackedTVShows)}`)
+        return sendOKResponse(!user.trackedTVShows)     
     } catch (error) {
         console.error(error)
         if(error instanceof jwt.TokenExpiredError) {

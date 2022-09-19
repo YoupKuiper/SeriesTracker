@@ -13,6 +13,12 @@ export class DynamoDBClient {
         }).promise()
     }
 
+    updateUser = async (updateParams) => {
+        const user = await docClient.update(updateParams).promise()
+        console.log(`Returning user: ${JSON.stringify(user)}`)
+        return user.Attributes
+    }
+
     getAllUsersAndTrackedShows = async () => {
         const response = await docClient.scan({ TableName: process.env.TV_SHOWS_TABLE_NAME || '' }).promise()
         if (!response.Items) {
@@ -24,7 +30,7 @@ export class DynamoDBClient {
         return response.Items
     }
 
-    getTVShowsByEmailAddress = async (emailAddress: string) => {
+    getUserByEmailAddress = async (emailAddress: string) => {
         // Get TVShows from DynamoDB by EmailAddress
         const { Item } = await docClient.get({
             Key: { emailAddress },
@@ -37,7 +43,7 @@ export class DynamoDBClient {
             return []
         }
 
-        return Item.trackedTVShows
+        return Item
     }
 
     getAlreadySentNotificationIds = async () => {
