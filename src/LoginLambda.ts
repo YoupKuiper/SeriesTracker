@@ -28,13 +28,13 @@ export const handler = async (event: any, context: any)=> {
             return sendErrorResponse('Invalid credentials');
         }
 
-        const { hashedPassword, unsubscribeEmailToken, ...user } = aws.DynamoDB.Converter.unmarshall(userDto.Item)
+        const { hashedPassword, unsubscribeEmailToken, resetPasswordToken, ...user } = aws.DynamoDB.Converter.unmarshall(userDto.Item)
 
         // Check if password is correct
         if(await isCorrectPassword(password, hashedPassword)){
             // Endcode a JWT token and return
             if(process.env.JWT_SECRET){
-                const token = signTokenFor(user.emailAddress, user.settings)
+                const token = signTokenFor(user.emailAddress, user.wantsEmailNotifications)
                 
                 console.log(`Login successful`)
                 return sendOKResponse({ token, user });

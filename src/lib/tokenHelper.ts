@@ -1,10 +1,11 @@
 import jwt from 'jsonwebtoken';
+import Crypto from 'crypto'
 
-export const signTokenFor = (emailAddress: string, settings: any) => {
+export const signTokenFor = (emailAddress: string, wantsEmailNotifications: any) => {
     if(process.env.JWT_SECRET){
         return jwt.sign({
             exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7), //expire after 1 week
-            data: { emailAddress: emailAddress, settings },
+            data: { emailAddress: emailAddress, wantsEmailNotifications },
             iat: Math.floor(Date.now() / 1000)
           }, process.env.JWT_SECRET);    
     }
@@ -18,4 +19,9 @@ export const isValid = (token: string): any => {
         return decodedToken;
     }
     throw new Error(`Environment variable for JWT secret required`);
+}
+
+export const createRandomString = () :any => {
+    const RANDOM_STRING_SIZE = 21
+    return Crypto.randomBytes(RANDOM_STRING_SIZE).toString('base64').slice(0, RANDOM_STRING_SIZE)
 }

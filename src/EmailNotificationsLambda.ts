@@ -13,7 +13,7 @@ export const handler = async (event: any, context: any) => {
 
     if(event.debug){
       console.log('debugging..')
-      return sendEmailNotificationTo('youp_feyenoord@hotmail.com', 
+      return sendEmailNotificationTo('youpkuiper@gmail.com', 
       'HOUSE OF THE DRAGON, SOUTH PARK', 
       `<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">&nbsp;<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">`, 
       'N2pPg4o/HVzSCzyp0N25h',
@@ -38,7 +38,7 @@ export const handler = async (event: any, context: any) => {
     let promises: Promise<any>[] = []
 
     for (const user of allTrackedShowsForAllUsers) {
-      if (!user.trackedTVShows || !user.settings.wantsEmailNotifications) {
+      if (!user.trackedTVShows || !user.wantsEmailNotifications) {
         continue;
       }
 
