@@ -29,7 +29,7 @@ export const UserObject = z.object({
 export const UserUpdateObject = z.object({
     wantsEmailNotifications: z.boolean().optional(),
     trackedTVShows: z.array(TVShowObject).optional()
-})
+}).strict();
 
 export type User = z.infer<typeof UserObject>;
 export type TVShow = z.infer<typeof TVShowObject>;
