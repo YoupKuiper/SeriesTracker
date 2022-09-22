@@ -3,6 +3,7 @@ import aws from "aws-sdk";
 import fs from 'fs';
 import { DynamoDBClient } from "./DynamoDBClient";
 import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
+import { sendEmail } from "./lib/sendEmailHelper";
 const ses = new aws.SES({ region: process.env.AWS_REGION });
 
 
@@ -111,20 +112,5 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
 
   console.log(`Email after replacements: ${htmlEmail}`)
 
-  const params = {
-    Destination: {
-      ToAddresses: [emailAddress],
-    },
-    Message: {
-      Body: {
-        Text: { Data: `Maybe posters will be shown in this email at some point` },
-        Html: {
-          Data: htmlEmail
-        },
-      },
-      Subject: { Data: `Airing today: ${trackedTVShowsNames}` },
-    },
-    Source: process.env.FROM_EMAIL_ADDRESS,
-  };
-  await ses.sendEmail(params).promise()
+  await sendEmail(emailAddress, `Airing today: ${trackedTVShowsNames}`, htmlEmail, `New episodes airing for ${trackedTVShowsNames}`)
 }

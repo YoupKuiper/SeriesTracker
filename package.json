@@ -8,7 +8,7 @@
     "local:email": "ts-node ./local/testEmailNotificationLambdaLocal.ts",
     "local:search": "ts-node ./local/testSearchTVShowsLambdaLocal.ts",
     "local:update": "ts-node ./local/updateUserRecordLambdaLocal.ts",
-    "build": "tsc && cp ./src/email-template.html ./dist/"
+    "build": "tsc && cp ./src/email-template.html ./src/reset-password-email-template.html ./dist/"
   },
   "keywords": [],
   "author": "",
