@@ -23,7 +23,7 @@ export const createDynamoDBUpdateParams = (
 
     let attributes = Object.keys(updateParams);
     if(token){
-        params["ConditionExpression"] = `:last${nameOfTokenToCheck} = :${nameOfTokenToCheck}`
+        params["ConditionExpression"] = `:last${nameOfTokenToCheck} = ${nameOfTokenToCheck}`
         params["ExpressionAttributeNames"][`#${nameOfTokenToCheck}`] = nameOfTokenToCheck
         params["ExpressionAttributeValues"][`:last${nameOfTokenToCheck}`] = token
     }

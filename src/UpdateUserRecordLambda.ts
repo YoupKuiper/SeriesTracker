@@ -22,7 +22,7 @@ export const handler = async (event: any, context: any) => {
                 wantsEmailNotifications: false,
                 unsubscribeEmailToken: createRandomString()
             }
-            const params = createDynamoDBUpdateParams(updateObject, parsedEvent.emailAddress, updateObject.unsubscribeEmailToken, 'unsubscribeEmailToken')
+            const params = createDynamoDBUpdateParams(updateObject, parsedEvent.emailAddress, parsedEvent.unsubscribeEmailToken, 'unsubscribeEmailToken')
             await dynamoDBClient.updateUser(params);
             return sendOKResponse('Great success!')
         }
@@ -33,7 +33,7 @@ export const handler = async (event: any, context: any) => {
                 resetPasswordToken: createRandomString()
             }
 
-            const params = createDynamoDBUpdateParams(updateObject, parsedEvent.emailAddress, updateObject.resetPasswordToken, 'resetPasswordToken')
+            const params = createDynamoDBUpdateParams(updateObject, parsedEvent.emailAddress, parsedEvent.resetPasswordToken, 'resetPasswordToken')
             await dynamoDBClient.updateUser(params);
             return sendOKResponse('Great success!')
         }
