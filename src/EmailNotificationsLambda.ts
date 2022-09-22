@@ -112,5 +112,5 @@ const sendEmailNotificationTo = async (emailAddress: string, trackedTVShowsNames
 
   console.log(`Email after replacements: ${htmlEmail}`)
 
-  await sendEmail(emailAddress, `Airing today: ${trackedTVShowsNames}`, htmlEmail, `New episodes airing for ${trackedTVShowsNames}`)
+  await sendEmail(process.env.FROM_EMAIL_ADDRESS, emailAddress, `Airing today: ${trackedTVShowsNames}`, htmlEmail, `New episodes airing for ${trackedTVShowsNames}`)
 }
