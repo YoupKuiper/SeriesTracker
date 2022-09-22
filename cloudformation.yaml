@@ -13,6 +13,9 @@ Parameters:
   FromEmailAddress:
     Type: String
     Description: Email address used to send emails
+  ResetPasswordFromEmailAddress:
+    Type: String
+    Description: Email address used to reset password
   UserTableName:
     Type: String
     Description: Name of DynamoDB table that holds user data
@@ -74,6 +77,31 @@ Resources:
           USER_TABLE_NAME: !Ref UserTableName
           TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
       Handler: EmailNotificationsLambda.handler
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaIAMRole
+          - Arn
+
+  ResetPasswordLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: ResetPasswordLambda
+      Description: Lambda function used for sending reset password emails
+      Runtime: nodejs16.x
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: !Ref CodeZipFileName
+      Environment:
+        Variables:
+          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+          RESET_PASSWORD_FROM_EMAIL_ADDRESS: !Ref ResetPasswordFromEmailAddress
+          USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+      Handler: ResetPasswordLambda.handler
       MemorySize: 128
       Timeout: 10
       Role:
@@ -253,6 +281,18 @@ Resources:
       ResourceId: !Ref ApiGatewayLoginResource
       RestApiId: !Ref TVShowTrackerApiGateway
 
+  ApiGatewayResetPasswordMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResetPasswordLambda.Arn}/invocations
+      ResourceId: !Ref ApiGatewayResetPasswordResource
+      RestApiId: !Ref TVShowTrackerApiGateway
+
 
   ApiGatewayCreateAccountMethod:
     Type: AWS::ApiGateway::Method
@@ -320,6 +360,35 @@ Resources:
       AuthorizationType: NONE
       RestApiId: !Ref TVShowTrackerApiGateway
       ResourceId: !Ref ApiGatewayLoginResource
+      HttpMethod: OPTIONS
+      Integration:
+        IntegrationResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+            method.response.header.Access-Control-Allow-Origin: "'*'"
+          ResponseTemplates:
+            application/json: ''
+        PassthroughBehavior: WHEN_NO_MATCH
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        Type: MOCK
+      MethodResponses:
+      - StatusCode: 200
+        ResponseModels:
+          application/json: 'Empty'
+        ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: false
+            method.response.header.Access-Control-Allow-Methods: false
+            method.response.header.Access-Control-Allow-Origin: false
+
+  OptionsMethodForResetPassword:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      RestApiId: !Ref TVShowTrackerApiGateway
+      ResourceId: !Ref ApiGatewayResetPasswordResource
       HttpMethod: OPTIONS
       Integration:
         IntegrationResponses:
@@ -495,6 +564,13 @@ Resources:
       PathPart: Login
       RestApiId: !Ref TVShowTrackerApiGateway
 
+  ApiGatewayResetPasswordResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+      PathPart: ResetPassword
+      RestApiId: !Ref TVShowTrackerApiGateway
+
   ApiGatewayCreateAccountResource:
     Type: AWS::ApiGateway::Resource
     Properties: 
@@ -534,12 +610,14 @@ Resources:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
       - ApiGatewayLoginMethod
+      - ApiGatewayResetPasswordMethod
       - ApiGatewayCreateAccountMethod
       - ApiGatewayUpdateUserMethod
       - ApiGatewayGetTrackedTVShowsMethod
       - ApiGatewayUpdateTrackedTVShowMethod
       - ApiGatewaySearchTVShowsMethod
       - OptionsMethodForLogin
+      - OptionsMethodForResetPassword
       - OptionsMethodForCreateAccount
       - OptionsMethodForUpdateTrackedTVShows
       - OptionsMethodForUpdateUser
@@ -612,6 +690,15 @@ Resources:
       FunctionName: !GetAtt LoginLambda.Arn
       Principal: apigateway.amazonaws.com          
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/Login
+
+
+  LambdaApiGatewayInvokeResetPassword:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt ResetPasswordLambda.Arn
+      Principal: apigateway.amazonaws.com          
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/ResetPassword
 
   LambdaApiGatewayInvokeCreateAccount:
     Type: AWS::Lambda::Permission
