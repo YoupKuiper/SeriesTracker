@@ -53,6 +53,6 @@ const searchTVShows = async (title: number) => {
 }
 
 const getDetailsForTVShow = async (id: number) => {
-    const response = await axios.get(`https://api.themoviedb.org/3/search/tv/${id}?api_key=${process.env.THE_MOVIE_DB_TOKEN}`)
+    const response = await axios.get(`https://api.themoviedb.org/3/tv/${id}?api_key=${process.env.THE_MOVIE_DB_TOKEN}`)
     return response.data;
 }
