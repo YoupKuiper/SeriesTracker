@@ -16,16 +16,14 @@ export const handler = async (event: any, context: any) => {
             for (let i = 0; i < parsedEvent.tvShowsIds.length; i++) {
                 promises.push(getDetailsForTVShow(tvShowsIds[i]))
             }
-            await Promise.allSettled(promises).
-                then((results) => {
-                    const allValues = results.map(result => {
-                        if (result.status === 'fulfilled') {
-                            return result.value
-                        }
-                    })
+            const allResults = await Promise.allSettled(promises)
+            const allTVShowDetails = allResults.map(result => {
+                if (result.status === 'fulfilled') {
+                    return result.value
+                }
+            })
 
-                    return sendOKResponse(allValues)
-                })
+            return sendOKResponse(allTVShowDetails)
         }
         if (parsedEvent.searchString) {
             tvShowsToReturn = await searchTVShows(parsedEvent.searchString);
