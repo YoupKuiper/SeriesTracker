@@ -1,7 +1,7 @@
 import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 const axios = require('axios').default;
 
-export const handler = async (event: any, context: any)=> {
+export const handler = async (event: any, context: any) => {
     console.log(`Incoming event body: ${JSON.stringify(event.body)}`);
 
     const parsedEvent = JSON.parse(event.body);
@@ -10,18 +10,26 @@ export const handler = async (event: any, context: any)=> {
     try {
 
         let tvShowsToReturn: any[] = []
-        if(parsedEvent.getDetails && parsedEvent.tvShowsIds){
+        if (parsedEvent.getDetails && parsedEvent.tvShowsIds) {
             const tvShowsIds = parsedEvent.tvShowsIds;
             let promises: Promise<any>[] = [];
             for (let i = 0; i < parsedEvent.tvShowsIds.length; i++) {
                 promises.push(getDetailsForTVShow(tvShowsIds[i]))
             }
-            const tvShowsDetailsForIds = await Promise.allSettled(promises);
-            return sendOKResponse(tvShowsDetailsForIds);
+            await Promise.allSettled(promises).
+                then((results) => {
+                    const allValues = results.map(result => {
+                        if (result.status === 'fulfilled') {
+                            return result.value
+                        }
+                    })
+
+                    return sendOKResponse(allValues)
+                })
         }
-        if(parsedEvent.searchString){
+        if (parsedEvent.searchString) {
             tvShowsToReturn = await searchTVShows(parsedEvent.searchString);
-        }else{
+        } else {
             //Empty search string, get popular
             let promises: Promise<any>[] = []
             for (let i = 1; i < 6; i++) {
@@ -30,11 +38,11 @@ export const handler = async (event: any, context: any)=> {
             const allFetchedPopularTVShowsPaged = await Promise.all(promises);
             const allFetchedPopularTVShows = Array.prototype.concat.apply([], allFetchedPopularTVShowsPaged);
             const allEnglishSpokenTVShows = allFetchedPopularTVShows.filter((tvShow) => tvShow.original_language === 'en')
-            const allTVShowsSorted = allEnglishSpokenTVShows.sort((a,b) => b.popularity - a.popularity)
+            const allTVShowsSorted = allEnglishSpokenTVShows.sort((a, b) => b.popularity - a.popularity)
             tvShowsToReturn = allTVShowsSorted.slice(0, 20);
         }
         console.log(`Returning found tv shows: ${JSON.stringify(tvShowsToReturn)}`)
-        return sendOKResponse(tvShowsToReturn)     
+        return sendOKResponse(tvShowsToReturn)
     } catch (error) {
         console.error(JSON.stringify(error))
         return sendErrorResponse('Failed to get searched TV Shows')
