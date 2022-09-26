@@ -10,6 +10,15 @@ export const handler = async (event: any, context: any)=> {
     try {
 
         let tvShowsToReturn: any[] = []
+        if(parsedEvent.getDetails && parsedEvent.tvShowsIds){
+            const tvShowsIds = parsedEvent.tvShowsIds;
+            let promises: Promise<any>[] = [];
+            for (let i = 0; i < parsedEvent.tvShowsIds.length; i++) {
+                promises.push(getDetailsForTVShow(tvShowsIds[i]))
+            }
+            const tvShowsDetailsForIds = await Promise.allSettled(promises);
+            return sendOKResponse(tvShowsDetailsForIds);
+        }
         if(parsedEvent.searchString){
             tvShowsToReturn = await searchTVShows(parsedEvent.searchString);
         }else{
@@ -41,4 +50,9 @@ const getPopularTVShowsForPageNumber = async (number: number) => {
 const searchTVShows = async (title: number) => {
     const response = await axios.get(`https://api.themoviedb.org/3/search/tv?api_key=${process.env.THE_MOVIE_DB_TOKEN}&query=${encodeURIComponent(title)}`)
     return response.data.results;
+}
+
+const getDetailsForTVShow = async (id: number) => {
+    const response = await axios.get(`https://api.themoviedb.org/3/search/tv/${id}?api_key=${process.env.THE_MOVIE_DB_TOKEN}`)
+    return response.data;
 }
