@@ -4,7 +4,7 @@ export const TVShowObject = z.object({
     id: z.number(),
     name: z.string(),
     poster_path: z.string(),
-    genre_ids: z.array(z.number()),
+    genre_ids: z.array(z.number()).optional(),
     origin_country: z.array(z.string()),
     original_language: z.string(),
     original_name: z.string(),
