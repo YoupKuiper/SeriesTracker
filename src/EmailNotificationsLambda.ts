@@ -12,14 +12,6 @@ export const handler = async (event: any, context: any) => {
 
   try {
 
-    if(event.debug){
-      console.log('debugging..')
-      return sendEmailNotificationTo('youpkuiper@gmail.com', 
-      'HOUSE OF THE DRAGON, SOUTH PARK', 
-      `<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">&nbsp;<img src="https://image.tmdb.org/t/p/w300/iiCY2QIGSnmtVkIdjkKAfwDs0KF.jpg" alt="$HOUSE OF THE DRAGON">`, 
-      'N2pPg4o/HVzSCzyp0N25h',
-      true)
-    }
     const dynamoDBClient = new DynamoDBClient()
     const allTrackedShowsForAllUsers = await dynamoDBClient.getAllUsersAndTrackedShows()
 
@@ -53,6 +45,11 @@ export const handler = async (event: any, context: any) => {
       for (let [index, TVShow] of trackedTVShowsAiringTodayForUser.entries()) {
         allNotifiedIds.push(TVShow.id)
         const tvShowName = TVShow.name.toUpperCase()
+        if(trackedTVShowsAiringTodayForUser.entries().length === 1){
+          trackedTVShowsNames += `${tvShowName}`
+          trackedTVShowsPosters += `<img src="https://image.tmdb.org/t/p/w300${TVShow.poster_path}" alt="${tvShowName}">&nbsp;`
+          break;
+        }
         trackedTVShowsNames += index === trackedTVShowsAiringTodayForUser.length - 1 ? `AND ${tvShowName}` : `${tvShowName}, `
         trackedTVShowsPosters += `<img src="https://image.tmdb.org/t/p/w300${TVShow.poster_path}" alt="${tvShowName}">&nbsp;`
       }
