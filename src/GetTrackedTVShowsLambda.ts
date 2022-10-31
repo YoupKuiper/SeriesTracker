@@ -3,6 +3,7 @@ import { DynamoDBClient } from "./DynamoDBClient";
 import { sendErrorResponse, sendOKResponse } from "./lib/responseHelper";
 import { isValid } from "./lib/tokenHelper";
 import jwt from 'jsonwebtoken';
+import { TVShow } from "./lib/types";
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
 export const handler = async (event: any, context: any)=> {
@@ -11,7 +12,7 @@ export const handler = async (event: any, context: any)=> {
     const parsedEvent = JSON.parse(event.body);
     console.log(`Parsed event body: ${JSON.stringify(parsedEvent)}`);
 
-    const { token } = parsedEvent
+    const { token, searchString } = parsedEvent
 
     try {
         // Check if token is valid
@@ -25,8 +26,10 @@ export const handler = async (event: any, context: any)=> {
             return sendOKResponse([]);
         }
 
-        console.log(`Returning found tv shows: ${JSON.stringify(user.trackedTVShows)}`)
-        return sendOKResponse(user.trackedTVShows)     
+        const showsToReturn = user.trackedTVShows.filter((tvShow: TVShow) => tvShow.name.toLowerCase().includes(searchString.toLowerCase()))
+
+        console.log(`Returning found tv shows: ${JSON.stringify(showsToReturn)}`)
+        return sendOKResponse(showsToReturn)     
     } catch (error) {
         console.error(error)
         if(error instanceof jwt.TokenExpiredError) {
