@@ -9,7 +9,7 @@ export const TVShowObject = z.object({
     original_language: z.string(),
     original_name: z.string(),
     popularity: z.number(),
-    first_air_date: z.string(),
+    first_air_date: z.string().optional(),
     overview: z.string(),
     backdrop_path: z.string(),
     vote_average: z.number(),
