@@ -5,13 +5,13 @@ export const TVShowObject = z.object({
     name: z.string(),
     poster_path: z.string(),
     genre_ids: z.array(z.number()).optional(),
-    origin_country: z.array(z.string()),
-    original_language: z.string(),
-    original_name: z.string(),
+    origin_country: z.array(z.string()).optional(),
+    original_language: z.string().optional(),
+    original_name: z.string().optional(),
     popularity: z.number(),
     first_air_date: z.string().optional(),
     overview: z.string(),
-    backdrop_path: z.string(),
+    backdrop_path: z.string().optional(),
     vote_average: z.number(),
     vote_count: z.number()
 })
