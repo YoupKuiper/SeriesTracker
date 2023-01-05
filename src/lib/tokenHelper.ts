@@ -1,27 +1,29 @@
-import jwt from 'jsonwebtoken';
-import Crypto from 'crypto'
+import jwt from "jsonwebtoken";
+import Crypto from "crypto";
 
 export const signTokenFor = (emailAddress: string, wantsEmailNotifications: any) => {
-    if(process.env.JWT_SECRET){
-        return jwt.sign({
-            exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7), //expire after 1 week
-            data: { emailAddress: emailAddress, wantsEmailNotifications },
-            iat: Math.floor(Date.now() / 1000)
-          }, process.env.JWT_SECRET);    
-    }
-    throw new Error(`Environment variable for JWT secret required`);
-}
+	if (process.env.JWT_SECRET) {
+		return jwt.sign(
+			{
+				data: { emailAddress: emailAddress, wantsEmailNotifications },
+				iat: Math.floor(Date.now() / 1000),
+			},
+			process.env.JWT_SECRET
+		);
+	}
+	throw new Error(`Environment variable for JWT secret required`);
+};
 
 export const isValid = (token: string): any => {
-    if(process.env.JWT_SECRET){
-        const decodedToken = jwt.verify(token, process.env.JWT_SECRET || '')
-        console.log(`Decoded token: ${JSON.stringify(decodedToken)}`)
-        return decodedToken;
-    }
-    throw new Error(`Environment variable for JWT secret required`);
-}
+	if (process.env.JWT_SECRET) {
+		const decodedToken = jwt.verify(token, process.env.JWT_SECRET || "");
+		console.log(`Decoded token: ${JSON.stringify(decodedToken)}`);
+		return decodedToken;
+	}
+	throw new Error(`Environment variable for JWT secret required`);
+};
 
-export const createRandomString = () :any => {
-    const RANDOM_STRING_SIZE = 21
-    return Crypto.randomBytes(RANDOM_STRING_SIZE).toString('base64').slice(0, RANDOM_STRING_SIZE)
-}
+export const createRandomString = (): any => {
+	const RANDOM_STRING_SIZE = 21;
+	return Crypto.randomBytes(RANDOM_STRING_SIZE).toString("base64").slice(0, RANDOM_STRING_SIZE);
+};
