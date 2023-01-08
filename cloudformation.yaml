@@ -259,6 +259,56 @@ Resources:
           - LambdaIAMRole
           - Arn
 
+  HandleSESEmailBounceLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: HandleSESEmailBounceLambda
+      Description: Lambda function used for handling SES email bounces
+      Runtime: nodejs16.x
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: !Ref CodeZipFileName
+      Environment:
+        Variables:
+          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+          USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+          JWT_SECRET: !Ref JWTSecret
+      Handler: HandleSESEmailBounceLambda.handler
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaIAMRole
+          - Arn
+
+  HandleSESEmailComplaintLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName:
+        Fn::Sub: HandleSESEmailComplaintLambda
+      Description: Lambda function used for handling SES email complaints
+      Runtime: nodejs16.x
+      Code:
+        S3Bucket: !Ref ArtifactBucketName
+        S3Key: !Ref CodeZipFileName
+      Environment:
+        Variables:
+          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+          USER_TABLE_NAME: !Ref UserTableName
+          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+          JWT_SECRET: !Ref JWTSecret
+      Handler: HandleSESEmailComplaintLambda.handler
+      MemorySize: 128
+      Timeout: 10
+      Role:
+        Fn::GetAtt:
+          - LambdaIAMRole
+          - Arn
+
   ## API GATEWAY
   TVShowTrackerApiGateway:
     Type: AWS::ApiGateway::RestApi
@@ -292,7 +342,6 @@ Resources:
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResetPasswordLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayResetPasswordResource
       RestApiId: !Ref TVShowTrackerApiGateway
-
 
   ApiGatewayCreateAccountMethod:
     Type: AWS::ApiGateway::Method
@@ -352,6 +401,30 @@ Resources:
         Type: AWS_PROXY
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateUserRecordLambda.Arn}/invocations
       ResourceId: !Ref ApiGatewayUpdateUserResource
+      RestApiId: !Ref TVShowTrackerApiGateway
+
+  ApiGatewayHandleSESEmailBounceMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HandleSESEmailBounceLambda.Arn}/invocations
+      ResourceId: !Ref HandleSESEmailBounceResource
+      RestApiId: !Ref TVShowTrackerApiGateway
+
+  ApiGatewayHandleSESEmailComplaintMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      AuthorizationType: NONE
+      HttpMethod: !Ref ApiGatewayHTTPMethod
+      Integration:
+        IntegrationHttpMethod: POST
+        Type: AWS_PROXY
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HandleSESEmailComplaintLambda.Arn}/invocations
+      ResourceId: !Ref HandleSESEmailComplaintResource
       RestApiId: !Ref TVShowTrackerApiGateway
 
   OptionsMethodForLogin:
@@ -606,6 +679,20 @@ Resources:
       PathPart: UpdateUser
       RestApiId: !Ref TVShowTrackerApiGateway
 
+  HandleSESEmailBounceResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+      PathPart: HandleSESEmailBounce
+      RestApiId: !Ref TVShowTrackerApiGateway
+
+  HandleSESEmailComplaintResource:
+    Type: AWS::ApiGateway::Resource
+    Properties: 
+      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+      PathPart: HandleSESEmailComplaint
+      RestApiId: !Ref TVShowTrackerApiGateway
+
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
     DependsOn:
@@ -616,6 +703,8 @@ Resources:
       - ApiGatewayGetTrackedTVShowsMethod
       - ApiGatewayUpdateTrackedTVShowMethod
       - ApiGatewaySearchTVShowsMethod
+      - ApiGatewayHandleSESEmailBounceMethod
+      - ApiGatewayHandleSESEmailComplaintMethod
       - OptionsMethodForLogin
       - OptionsMethodForResetPassword
       - OptionsMethodForCreateAccount
@@ -739,3 +828,19 @@ Resources:
       FunctionName: !GetAtt UpdateUserRecordLambda.Arn
       Principal: apigateway.amazonaws.com          
       SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateUser
+
+  LambdaApiGatewayInvokeHandleSESEmailBounce:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt HandleSESEmailBounceLambda.Arn
+      Principal: apigateway.amazonaws.com          
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/HandleSESEmailBounce
+
+  LambdaApiGatewayInvokeHandleSESEmailComplaint:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !GetAtt HandleSESEmailComplaintLambda.Arn
+      Principal: apigateway.amazonaws.com          
+      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/HandleSESEmailComplaint
