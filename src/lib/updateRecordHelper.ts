@@ -29,7 +29,6 @@ export const createDynamoDBUpdateParams = (
     }
     for (let i = 0; i < attributes.length; i++) {
         let attribute = attributes[i];
-        // Prevent emailAddress, password and token to be updated
         if (attribute != idAttributeName) {
             params["UpdateExpression"] += prefix + "#" + attribute + " = :" + attribute;
             params["ExpressionAttributeValues"][":" + attribute] = updateObject[attribute];
