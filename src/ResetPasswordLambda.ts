@@ -28,9 +28,10 @@ export const handler = async (event: any, context: any) => {
 
         console.log(`Email after replacements: ${htmlEmail}`)
         // Send email with password reset link if exists
-        if(process.env.RESET_PASSWORD_FROM_EMAIL_ADDRESS){
-            await sendEmail(process.env.RESET_PASSWORD_FROM_EMAIL_ADDRESS, user.emailAddress, 'Password reset request', htmlEmail, '')
+        if(!process.env.RESET_PASSWORD_FROM_EMAIL_ADDRESS){
+            throw 'ENV var for email address missing'
         }
+        await sendEmail(process.env.RESET_PASSWORD_FROM_EMAIL_ADDRESS, user.emailAddress, 'Password reset request', htmlEmail, '')
         return sendOKResponse('Great success!');
     } catch (error) {
         console.error(error)

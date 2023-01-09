@@ -1,8 +1,0 @@
-{
-    "TemplateName": "SignUpVerificationEmailTemplate",
-    "FromEmailAddress": "signup@tvtracker.net",
-    "TemplateSubject": "Please confirm your email address",
-    "TemplateContent": "<!doctype html> <html style='background-color: #f6f6f6;'> <head> </head> <body style='width: 75%;background-color: white;text-align: center;margin: auto;'> <h1>A request to create your account was received by TVTracker</h1> <br /> <br /> <i>Thank you for using TVTracker</i> </body> </html>",
-    "SuccessRedirectionURL": "https://www.tvtracker.net/verifysuccess",
-    "FailureRedirectionURL": "https://www.tvtracker.net/verifyfailure"
-}
