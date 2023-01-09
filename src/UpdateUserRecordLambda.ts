@@ -16,6 +16,7 @@ export const handler = async (event: any, context: any) => {
         let updateObject: any = {}
         const isUnsubscribeFromEmailsRequest = parsedEvent.emailAddress && parsedEvent.unsubscribeEmailToken
         const isResetPasswordRequest = parsedEvent.emailAddress && parsedEvent.newPassword && parsedEvent.resetPasswordToken
+        const isVerifyEmailAddressRequest = parsedEvent.emailAddress && parsedEvent.verifyEmailAddressToken
 
         if (isUnsubscribeFromEmailsRequest) {
             updateObject = {
@@ -38,6 +39,16 @@ export const handler = async (event: any, context: any) => {
             return sendOKResponse('Great success!')
         }
 
+        if (isVerifyEmailAddressRequest) {
+            updateObject = {
+                emailAddressVerified: true,
+            }
+
+            const params = createDynamoDBUpdateParams(updateObject, parsedEvent.emailAddress, parsedEvent.verifyEmailAddressToken, 'verifyEmailAddressToken')
+            await dynamoDBClient.updateUser(params);
+            return sendOKResponse('Great success!')
+        }
+
         // Check if token is valid
         const decodedToken = isValid(parsedEvent.token);
         updateObject = UserUpdateObject.parse(parsedEvent.updateObject)
@@ -47,7 +58,7 @@ export const handler = async (event: any, context: any) => {
             return sendErrorResponse('Failed to update user data')
         }
         // Return user without sensitive data
-        const { hashedPassword, unsubscribeEmailToken, resetPasswordToken, ...userWithoutPassword } = updatedUser;
+        const { hashedPassword, unsubscribeEmailToken, resetPasswordToken, verifyEmailAddressToken, ...userWithoutPassword } = updatedUser;
 
         console.log(`Updated item: ${JSON.stringify(userWithoutPassword)}`)
         return sendOKResponse(userWithoutPassword)
