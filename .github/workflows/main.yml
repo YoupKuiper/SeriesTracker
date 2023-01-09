@@ -55,6 +55,7 @@ jobs:
             TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }},
             FromEmailAddress=${{ secrets.FROM_EMAIL_ADDRESS }},
             ResetPasswordFromEmailAddress=${{ secrets.PASSWORD_RESET_FROM_EMAIL_ADDRESS }},
+            VerifyEmailAddressFromEmailAddress=${{ secrets.VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS }},
             CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }},
             UserTableName=${{ env.USER_TABLE_NAME }},
             TvShowsTableName=${{ env.TV_SHOWS_TABLE_NAME }},

@@ -16,6 +16,9 @@ Parameters:
   ResetPasswordFromEmailAddress:
     Type: String
     Description: Email address used to reset password
+  VerifyEmailAddressFromEmailAddress:
+    Type: String
+    Description: Email address used to verify email addresses
   UserTableName:
     Type: String
     Description: Name of DynamoDB table that holds user data
@@ -124,6 +127,7 @@ Resources:
           THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
           FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
           USER_TABLE_NAME: !Ref UserTableName
+          VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS: !Ref VerifyEmailAddressFromEmailAddress
           TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
           JWT_SECRET: !Ref JWTSecret
       Handler: AccountCreationLambda.handler
