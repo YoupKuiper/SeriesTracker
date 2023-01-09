@@ -42,6 +42,7 @@ export const handler = async (event: any, context: any) => {
         if (isVerifyEmailAddressRequest) {
             updateObject = {
                 emailAddressVerified: true,
+                verifyEmailAddressToken: createRandomString()
             }
 
             const params = createDynamoDBUpdateParams(updateObject, parsedEvent.emailAddress, parsedEvent.verifyEmailAddressToken, 'verifyEmailAddressToken')
