@@ -26,9 +26,11 @@ export const handler = async (event: any, context: any) => {
 
         // Send verification email
         var verificationParams = {
-            EmailAddress: parsedEvent.emailAddress
+            EmailAddress: parsedEvent.emailAddress,
+            TemplateName: 'SignUpVerificationEmailTemplate'
         };
-        await ses.verifyEmailIdentity(verificationParams).promise();
+        
+        await ses.sendCustomVerificationEmail(verificationParams).promise();
 
         return sendOKResponse('Account created')
 
