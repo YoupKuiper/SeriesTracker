@@ -18,12 +18,11 @@ export const handler = async (event: any, context: any) => {
 			const decodedToken = isValid(parsedEvent.token);
 			const emailAddress = decodedToken["data"]["emailAddress"];
 			const userDto = await new DynamoDBClient().getUserByEmailAddress(emailAddress);
-			const { wantsEmailNotifications, wantsMobileNotifications, mobileNotificationsToken } = userDto;
+			const { wantsEmailNotifications, wantsMobileNotifications } = userDto;
 			return sendOKResponse({
 				emailAddress,
 				wantsEmailNotifications,
 				wantsMobileNotifications,
-				mobileNotificationsToken,
 			});
 		}
 
@@ -45,7 +44,7 @@ export const handler = async (event: any, context: any) => {
 			return sendErrorResponse("Invalid credentials");
 		}
 
-		const { hashedPassword, unsubscribeEmailToken, resetPasswordToken, mobileNotificationsToken, ...user } =
+		const { hashedPassword, unsubscribeEmailToken, resetPasswordToken, ...user } =
 			aws.DynamoDB.Converter.unmarshall(userDto.Item);
 
 		// Check if password is correct
