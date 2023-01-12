@@ -71,8 +71,9 @@ export const handler = async (event: any, context: any) => {
 			updateObject = {
 				mobileNotificationsToken: parsedEvent.mobileNotificationsToken,
 			};
+			const decodedToken = isValid(parsedEvent.token);
 
-			const params = createDynamoDBUpdateParams(updateObject, parsedEvent.emailAddress);
+			const params = createDynamoDBUpdateParams(updateObject, decodedToken["data"]["emailAddress"]);
 			await dynamoDBClient.updateUser(params);
 			return sendOKResponse("Great success!");
 		}
