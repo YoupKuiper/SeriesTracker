@@ -18,7 +18,6 @@ export const handler = async (event: any, context: any) => {
 		const isResetPasswordRequest =
 			parsedEvent.emailAddress && parsedEvent.newPassword && parsedEvent.resetPasswordToken;
 		const isVerifyEmailAddressRequest = parsedEvent.emailAddress && parsedEvent.verifyEmailAddressToken;
-		const isUpdateMobileNotificationsRequest = parsedEvent.token && parsedEvent.mobileNotificationsToken;
 
 		if (isUnsubscribeFromEmailsRequest) {
 			updateObject = {
@@ -63,17 +62,6 @@ export const handler = async (event: any, context: any) => {
 				parsedEvent.verifyEmailAddressToken,
 				"verifyEmailAddressToken"
 			);
-			await dynamoDBClient.updateUser(params);
-			return sendOKResponse("Great success!");
-		}
-
-		if (isUpdateMobileNotificationsRequest) {
-			updateObject = {
-				mobileNotificationsToken: parsedEvent.mobileNotificationsToken,
-			};
-			const decodedToken = isValid(parsedEvent.token);
-
-			const params = createDynamoDBUpdateParams(updateObject, decodedToken["data"]["emailAddress"]);
 			await dynamoDBClient.updateUser(params);
 			return sendOKResponse("Great success!");
 		}
