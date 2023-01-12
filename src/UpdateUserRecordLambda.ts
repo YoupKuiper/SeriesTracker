@@ -18,7 +18,7 @@ export const handler = async (event: any, context: any) => {
 		const isResetPasswordRequest =
 			parsedEvent.emailAddress && parsedEvent.newPassword && parsedEvent.resetPasswordToken;
 		const isVerifyEmailAddressRequest = parsedEvent.emailAddress && parsedEvent.verifyEmailAddressToken;
-		const isUpdateMobileNotificationsRequest = parsedEvent.emailAddress && parsedEvent.mobileNotificationsToken;
+		const isUpdateMobileNotificationsRequest = parsedEvent.token && parsedEvent.mobileNotificationsToken;
 
 		if (isUnsubscribeFromEmailsRequest) {
 			updateObject = {
