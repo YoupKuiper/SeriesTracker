@@ -1,11 +1,11 @@
 import jwt from "jsonwebtoken";
 import Crypto from "crypto";
 
-export const signTokenFor = (emailAddress: string, wantsEmailNotifications: any) => {
+export const signTokenFor = (emailAddress: string, wantsEmailNotifications: any, wantsMobileNotifications: any) => {
 	if (process.env.JWT_SECRET) {
 		return jwt.sign(
 			{
-				data: { emailAddress: emailAddress, wantsEmailNotifications },
+				data: { emailAddress, wantsEmailNotifications, wantsMobileNotifications },
 				iat: Math.floor(Date.now() / 1000),
 			},
 			process.env.JWT_SECRET
