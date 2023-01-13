@@ -158,6 +158,7 @@ const sendMobileNotificationTo = async (emailAddress, userDeviceToken, trackedTV
 			},
 			{
 				headers: {
+					"Content-Type": "application/json",
 					Authorization: `key=${process.env.FIREBASE_NOTIFICATION_KEY_ANDROID}`,
 				},
 			}
