@@ -152,8 +152,8 @@ const sendMobileNotificationTo = async (emailAddress, userDeviceToken, trackedTV
 			{
 				to: userDeviceToken,
 				notification: {
-					title: `NEW EPISODE: ${trackedTVShowsNames}`,
-					body: "Enjoy!",
+					title: `AIRING TODAY`,
+					body: `${trackedTVShowsNames}`,
 				},
 			},
 			{
