@@ -1,63 +1,64 @@
 name: deploy to aws
 on: [push]
 jobs:
-  deploy_source:
-    name: build and deploy aws infra
-    runs-on: ubuntu-latest
+    deploy_source:
+        name: build and deploy aws infra
+        runs-on: ubuntu-latest
 
-    env:
-      CODE_ZIPFILE_NAME: TVShowsTrackerCode-${{ github.run_id }}-${{ github.run_attempt }}.zip
-      AWS_REGION: eu-west-1
-      USER_TABLE_NAME: UserTable
-      TV_SHOWS_TABLE_NAME: TVShowsTable
-      API_GATEWAY_NAME: TVShowTrackerAPI
-      
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v2
+        env:
+            CODE_ZIPFILE_NAME: TVShowsTrackerCode-${{ github.run_id }}-${{ github.run_attempt }}.zip
+            AWS_REGION: eu-west-1
+            USER_TABLE_NAME: UserTable
+            TV_SHOWS_TABLE_NAME: TVShowsTable
+            API_GATEWAY_NAME: TVShowTrackerAPI
 
-      - name: Install dependencies
-        run: npm install
+        steps:
+            - name: Checkout Code
+              uses: actions/checkout@v2
 
-      - name: Build
-        run: npm run build
+            - name: Install dependencies
+              run: npm install
 
-      - name: Move node_modules to dist
-        run: mv node_modules dist/node_modules
+            - name: Build
+              run: npm run build
 
-      - name: Create Lambda Zip file
-        run: |
-          (cd dist && zip -r ../${{ env.CODE_ZIPFILE_NAME }} .)
+            - name: Move node_modules to dist
+              run: mv node_modules dist/node_modules
 
-      - name: Configure AWS credentials
-        id: creds
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.AWS_REGION }}
+            - name: Create Lambda Zip file
+              run: |
+                  (cd dist && zip -r ../${{ env.CODE_ZIPFILE_NAME }} .)
 
-      - name: Copy lambda code to s3 bucket
-        run: |
-          ls
-          aws s3 cp ${{ env.CODE_ZIPFILE_NAME }} s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
+            - name: Configure AWS credentials
+              id: creds
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy with CloudFormation
-        uses: aws-actions/aws-cloudformation-github-deploy@v1
-        id: TVShowsTracker
-        with:
-          name: TVShowsTrackerStack
-          template: cloudformation.yaml
-          no-fail-on-empty-changeset: "1"
-          capabilities: "CAPABILITY_NAMED_IAM"
-          parameter-overrides: >-
-            ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }},
-            TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }},
-            FromEmailAddress=${{ secrets.FROM_EMAIL_ADDRESS }},
-            ResetPasswordFromEmailAddress=${{ secrets.PASSWORD_RESET_FROM_EMAIL_ADDRESS }},
-            VerifyEmailAddressFromEmailAddress=${{ secrets.VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS }},
-            CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }},
-            UserTableName=${{ env.USER_TABLE_NAME }},
-            TvShowsTableName=${{ env.TV_SHOWS_TABLE_NAME }},
-            JWTSecret=${{ secrets.JWT_SECRET }},
-            APIGatewayName=${{ env.API_GATEWAY_NAME }}
+            - name: Copy lambda code to s3 bucket
+              run: |
+                  ls
+                  aws s3 cp ${{ env.CODE_ZIPFILE_NAME }} s3://${{ secrets.ARTIFACT_BUCKET_NAME }}
+
+            - name: Deploy with CloudFormation
+              uses: aws-actions/aws-cloudformation-github-deploy@v1
+              id: TVShowsTracker
+              with:
+                  name: TVShowsTrackerStack
+                  template: cloudformation.yaml
+                  no-fail-on-empty-changeset: "1"
+                  capabilities: "CAPABILITY_NAMED_IAM"
+                  parameter-overrides: >-
+                      ArtifactBucketName=${{ secrets.ARTIFACT_BUCKET_NAME }},
+                      TheMovieDbToken=${{ secrets.THE_MOVIE_DB_TOKEN }},
+                      FromEmailAddress=${{ secrets.FROM_EMAIL_ADDRESS }},
+                      ResetPasswordFromEmailAddress=${{ secrets.PASSWORD_RESET_FROM_EMAIL_ADDRESS }},
+                      VerifyEmailAddressFromEmailAddress=${{ secrets.VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS }},
+                      FirebaseNotificationKeyAndroid=${{ secrets.FIREBASE_NOTIFICATION_KEY_ANDROID }},
+                      CodeZipFileName=${{ env.CODE_ZIPFILE_NAME }},
+                      UserTableName=${{ env.USER_TABLE_NAME }},
+                      TvShowsTableName=${{ env.TV_SHOWS_TABLE_NAME }},
+                      JWTSecret=${{ secrets.JWT_SECRET }},
+                      APIGatewayName=${{ env.API_GATEWAY_NAME }}

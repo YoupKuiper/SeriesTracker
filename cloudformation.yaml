@@ -1,850 +1,851 @@
-AWSTemplateFormatVersion: '2010-09-09'
+AWSTemplateFormatVersion: "2010-09-09"
 Description: Deploying TVShowsTracker infrastructure
 Parameters:
-  ArtifactBucketName:
-    Type: String
-    Description: Name of the S3 bucket where artifacts are stored
-  CodeZipFileName:
-    Type: String
-    Description: Name of the zipfile containing the Lambda code
-  TheMovieDbToken:
-    Type: String
-    Description: Token for calling the movie db api
-  FromEmailAddress:
-    Type: String
-    Description: Email address used to send emails
-  ResetPasswordFromEmailAddress:
-    Type: String
-    Description: Email address used to reset password
-  VerifyEmailAddressFromEmailAddress:
-    Type: String
-    Description: Email address used to verify email addresses
-  UserTableName:
-    Type: String
-    Description: Name of DynamoDB table that holds user data
-  TvShowsTableName:
-    Type: String
-    Description: Name of DynamoDB table that holds tv shows
-  JWTSecret:
-    Type: String
-    Description: Secret used for signing JWT token
-  APIGatewayName:
-    Type: String
-    Description: Name of the API
-  ApiGatewayStageName:
-    Type: String
-    Description: stage of api gateway deployment
-    Default: prod
-  ApiGatewayHTTPMethod:
-    Type: String
-    Default: POST
+    ArtifactBucketName:
+        Type: String
+        Description: Name of the S3 bucket where artifacts are stored
+    CodeZipFileName:
+        Type: String
+        Description: Name of the zipfile containing the Lambda code
+    TheMovieDbToken:
+        Type: String
+        Description: Token for calling the movie db api
+    FromEmailAddress:
+        Type: String
+        Description: Email address used to send emails
+    ResetPasswordFromEmailAddress:
+        Type: String
+        Description: Email address used to reset password
+    VerifyEmailAddressFromEmailAddress:
+        Type: String
+        Description: Email address used to verify email addresses
+    FirebaseNotificationKeyAndroid:
+        Type: String
+        Description: API Key to send notifications to Android app
+    UserTableName:
+        Type: String
+        Description: Name of DynamoDB table that holds user data
+    TvShowsTableName:
+        Type: String
+        Description: Name of DynamoDB table that holds tv shows
+    JWTSecret:
+        Type: String
+        Description: Secret used for signing JWT token
+    APIGatewayName:
+        Type: String
+        Description: Name of the API
+    ApiGatewayStageName:
+        Type: String
+        Description: stage of api gateway deployment
+        Default: prod
+    ApiGatewayHTTPMethod:
+        Type: String
+        Default: POST
 
 Resources:
+    ## IAM ROLES
+    LambdaIAMRole:
+        Type: AWS::IAM::Role
+        Properties:
+            RoleName:
+                Fn::Sub: lambda-role
+            AssumeRolePolicyDocument:
+                Statement:
+                    - Action:
+                          - sts:AssumeRole
+                      Effect: Allow
+                      Principal:
+                          Service:
+                              - lambda.amazonaws.com
+                Version: 2012-10-17
+            ManagedPolicyArns:
+                - arn:aws:iam::aws:policy/AWSLambdaExecute
+                - arn:aws:iam::aws:policy/AmazonSESFullAccess
+                - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+            Path: /
 
-  ## IAM ROLES
-  LambdaIAMRole:
-    Type: AWS::IAM::Role
-    Properties:
-      RoleName:
-        Fn::Sub: lambda-role
-      AssumeRolePolicyDocument:
-        Statement:
-          - Action:
-            - sts:AssumeRole
-            Effect: Allow
-            Principal:
-              Service:
-              - lambda.amazonaws.com
-        Version: 2012-10-17
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSLambdaExecute
-        - arn:aws:iam::aws:policy/AmazonSESFullAccess
-        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
-      Path: /
+    ## LAMBDA FUNCTIONS
+    EmailNotificationsLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: EmailNotificationsLambda
+            Description: Lambda function that notifies users of airing episodes for tracked tv shows
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    FIREBASE_NOTIFICATION_KEY_ANDROID: !Ref FirebaseNotificationKeyAndroid
+            Handler: EmailNotificationsLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  ## LAMBDA FUNCTIONS
-  EmailNotificationsLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: EmailNotificationsLambda
-      Description: Lambda function that notifies users of airing episodes for tracked tv shows
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-      Handler: EmailNotificationsLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    ResetPasswordLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: ResetPasswordLambda
+            Description: Lambda function used for sending reset password emails
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    RESET_PASSWORD_FROM_EMAIL_ADDRESS: !Ref ResetPasswordFromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+            Handler: ResetPasswordLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  ResetPasswordLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: ResetPasswordLambda
-      Description: Lambda function used for sending reset password emails
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          RESET_PASSWORD_FROM_EMAIL_ADDRESS: !Ref ResetPasswordFromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-      Handler: ResetPasswordLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    AccountCreationLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: AccountCreationLambda
+            Description: Lambda function for creating user accounts and storing them in DynamoDB
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS: !Ref VerifyEmailAddressFromEmailAddress
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: AccountCreationLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  AccountCreationLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: AccountCreationLambda
-      Description: Lambda function for creating user accounts and storing them in DynamoDB
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS: !Ref VerifyEmailAddressFromEmailAddress
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: AccountCreationLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    GetTrackedTVShowsLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: GetTrackedTVShowsLambda
+            Description: Lambda function for getting tracked TV shows for a user
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: GetTrackedTVShowsLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  GetTrackedTVShowsLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: GetTrackedTVShowsLambda
-      Description: Lambda function for getting tracked TV shows for a user
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: GetTrackedTVShowsLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    UpdateTrackedTVShowLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: UpdateTrackedTVShowLambda
+            Description: Lambda function for adding a tracked TV show for a user
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: UpdateTrackedTVShowLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  UpdateTrackedTVShowLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: UpdateTrackedTVShowLambda
-      Description: Lambda function for adding a tracked TV show for a user
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: UpdateTrackedTVShowLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    SearchTVShowsLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: SearchTVShowsLambda
+            Description: Getting popular or searched tv shows from themoviedb
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: SearchTVShowsLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  SearchTVShowsLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: SearchTVShowsLambda
-      Description: Getting popular or searched tv shows from themoviedb
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: SearchTVShowsLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    LoginLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: LoginLambda
+            Description: Lambda function used for logging in users
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: LoginLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  LoginLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: LoginLambda
-      Description: Lambda function used for logging in users
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: LoginLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    UpdateUserRecordLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: UpdateUserRecordLambda
+            Description: Lambda function used for updating user settings
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: UpdateUserRecordLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  UpdateUserRecordLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: UpdateUserRecordLambda
-      Description: Lambda function used for updating user settings
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: UpdateUserRecordLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    HandleSESEmailBounceLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: HandleSESEmailBounceLambda
+            Description: Lambda function used for handling SES email bounces
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: HandleSESEmailBounceLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  HandleSESEmailBounceLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: HandleSESEmailBounceLambda
-      Description: Lambda function used for handling SES email bounces
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: HandleSESEmailBounceLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    HandleSESEmailComplaintLambda:
+        Type: AWS::Lambda::Function
+        Properties:
+            FunctionName:
+                Fn::Sub: HandleSESEmailComplaintLambda
+            Description: Lambda function used for handling SES email complaints
+            Runtime: nodejs16.x
+            Code:
+                S3Bucket: !Ref ArtifactBucketName
+                S3Key: !Ref CodeZipFileName
+            Environment:
+                Variables:
+                    THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
+                    FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
+                    USER_TABLE_NAME: !Ref UserTableName
+                    TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
+                    JWT_SECRET: !Ref JWTSecret
+            Handler: HandleSESEmailComplaintLambda.handler
+            MemorySize: 128
+            Timeout: 10
+            Role:
+                Fn::GetAtt:
+                    - LambdaIAMRole
+                    - Arn
 
-  HandleSESEmailComplaintLambda:
-    Type: AWS::Lambda::Function
-    Properties:
-      FunctionName:
-        Fn::Sub: HandleSESEmailComplaintLambda
-      Description: Lambda function used for handling SES email complaints
-      Runtime: nodejs16.x
-      Code:
-        S3Bucket: !Ref ArtifactBucketName
-        S3Key: !Ref CodeZipFileName
-      Environment:
-        Variables:
-          THE_MOVIE_DB_TOKEN: !Ref TheMovieDbToken
-          FROM_EMAIL_ADDRESS: !Ref FromEmailAddress
-          USER_TABLE_NAME: !Ref UserTableName
-          TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
-          JWT_SECRET: !Ref JWTSecret
-      Handler: HandleSESEmailComplaintLambda.handler
-      MemorySize: 128
-      Timeout: 10
-      Role:
-        Fn::GetAtt:
-          - LambdaIAMRole
-          - Arn
+    ## API GATEWAY
+    TVShowTrackerApiGateway:
+        Type: AWS::ApiGateway::RestApi
+        Properties:
+            Description: API Gateway for TV Show Tracker
+            EndpointConfiguration:
+                Types:
+                    - REGIONAL
+            Name: !Ref APIGatewayName
 
-  ## API GATEWAY
-  TVShowTrackerApiGateway:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Description: API Gateway for TV Show Tracker
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-      Name: !Ref APIGatewayName
+    ApiGatewayLoginMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLambda.Arn}/invocations
+            ResourceId: !Ref ApiGatewayLoginResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayLoginMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LoginLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayLoginResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayResetPasswordMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResetPasswordLambda.Arn}/invocations
+            ResourceId: !Ref ApiGatewayResetPasswordResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayResetPasswordMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${ResetPasswordLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayResetPasswordResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayCreateAccountMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AccountCreationLambda.Arn}/invocations
+            ResourceId: !Ref ApiGatewayCreateAccountResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayCreateAccountMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AccountCreationLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayCreateAccountResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayGetTrackedTVShowsMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTrackedTVShowsLambda.Arn}/invocations
+            ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayGetTrackedTVShowsMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetTrackedTVShowsLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayUpdateTrackedTVShowMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateTrackedTVShowLambda.Arn}/invocations
+            ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayUpdateTrackedTVShowMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateTrackedTVShowLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewaySearchTVShowsMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SearchTVShowsLambda.Arn}/invocations
+            ResourceId: !Ref ApiGatewaySearchTVShowsResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewaySearchTVShowsMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${SearchTVShowsLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewaySearchTVShowsResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayUpdateUserMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateUserRecordLambda.Arn}/invocations
+            ResourceId: !Ref ApiGatewayUpdateUserResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayUpdateUserMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${UpdateUserRecordLambda.Arn}/invocations
-      ResourceId: !Ref ApiGatewayUpdateUserResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayHandleSESEmailBounceMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HandleSESEmailBounceLambda.Arn}/invocations
+            ResourceId: !Ref HandleSESEmailBounceResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayHandleSESEmailBounceMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HandleSESEmailBounceLambda.Arn}/invocations
-      ResourceId: !Ref HandleSESEmailBounceResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayHandleSESEmailComplaintMethod:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            HttpMethod: !Ref ApiGatewayHTTPMethod
+            Integration:
+                IntegrationHttpMethod: POST
+                Type: AWS_PROXY
+                Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HandleSESEmailComplaintLambda.Arn}/invocations
+            ResourceId: !Ref HandleSESEmailComplaintResource
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayHandleSESEmailComplaintMethod:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      HttpMethod: !Ref ApiGatewayHTTPMethod
-      Integration:
-        IntegrationHttpMethod: POST
-        Type: AWS_PROXY
-        Uri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${HandleSESEmailComplaintLambda.Arn}/invocations
-      ResourceId: !Ref HandleSESEmailComplaintResource
-      RestApiId: !Ref TVShowTrackerApiGateway
+    OptionsMethodForLogin:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            RestApiId: !Ref TVShowTrackerApiGateway
+            ResourceId: !Ref ApiGatewayLoginResource
+            HttpMethod: OPTIONS
+            Integration:
+                IntegrationResponses:
+                    - StatusCode: 200
+                      ResponseParameters:
+                          method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                          method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                          method.response.header.Access-Control-Allow-Origin: "'*'"
+                      ResponseTemplates:
+                          application/json: ""
+                PassthroughBehavior: WHEN_NO_MATCH
+                RequestTemplates:
+                    application/json: '{"statusCode": 200}'
+                Type: MOCK
+            MethodResponses:
+                - StatusCode: 200
+                  ResponseModels:
+                      application/json: "Empty"
+                  ResponseParameters:
+                      method.response.header.Access-Control-Allow-Headers: false
+                      method.response.header.Access-Control-Allow-Methods: false
+                      method.response.header.Access-Control-Allow-Origin: false
 
-  OptionsMethodForLogin:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      RestApiId: !Ref TVShowTrackerApiGateway
-      ResourceId: !Ref ApiGatewayLoginResource
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+    OptionsMethodForResetPassword:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            RestApiId: !Ref TVShowTrackerApiGateway
+            ResourceId: !Ref ApiGatewayResetPasswordResource
+            HttpMethod: OPTIONS
+            Integration:
+                IntegrationResponses:
+                    - StatusCode: 200
+                      ResponseParameters:
+                          method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                          method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                          method.response.header.Access-Control-Allow-Origin: "'*'"
+                      ResponseTemplates:
+                          application/json: ""
+                PassthroughBehavior: WHEN_NO_MATCH
+                RequestTemplates:
+                    application/json: '{"statusCode": 200}'
+                Type: MOCK
+            MethodResponses:
+                - StatusCode: 200
+                  ResponseModels:
+                      application/json: "Empty"
+                  ResponseParameters:
+                      method.response.header.Access-Control-Allow-Headers: false
+                      method.response.header.Access-Control-Allow-Methods: false
+                      method.response.header.Access-Control-Allow-Origin: false
 
-  OptionsMethodForResetPassword:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      RestApiId: !Ref TVShowTrackerApiGateway
-      ResourceId: !Ref ApiGatewayResetPasswordResource
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+    OptionsMethodForCreateAccount:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            RestApiId: !Ref TVShowTrackerApiGateway
+            ResourceId: !Ref ApiGatewayCreateAccountResource
+            HttpMethod: OPTIONS
+            Integration:
+                IntegrationResponses:
+                    - StatusCode: 200
+                      ResponseParameters:
+                          method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                          method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                          method.response.header.Access-Control-Allow-Origin: "'*'"
+                      ResponseTemplates:
+                          application/json: ""
+                PassthroughBehavior: WHEN_NO_MATCH
+                RequestTemplates:
+                    application/json: '{"statusCode": 200}'
+                Type: MOCK
+            MethodResponses:
+                - StatusCode: 200
+                  ResponseModels:
+                      application/json: "Empty"
+                  ResponseParameters:
+                      method.response.header.Access-Control-Allow-Headers: false
+                      method.response.header.Access-Control-Allow-Methods: false
+                      method.response.header.Access-Control-Allow-Origin: false
 
-  OptionsMethodForCreateAccount:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      RestApiId: !Ref TVShowTrackerApiGateway
-      ResourceId: !Ref ApiGatewayCreateAccountResource
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+    OptionsMethodForUpdateTrackedTVShows:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
+            RestApiId: !Ref TVShowTrackerApiGateway
+            HttpMethod: OPTIONS
+            Integration:
+                IntegrationResponses:
+                    - StatusCode: 200
+                      ResponseParameters:
+                          method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                          method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                          method.response.header.Access-Control-Allow-Origin: "'*'"
+                      ResponseTemplates:
+                          application/json: ""
+                PassthroughBehavior: WHEN_NO_MATCH
+                RequestTemplates:
+                    application/json: '{"statusCode": 200}'
+                Type: MOCK
+            MethodResponses:
+                - StatusCode: 200
+                  ResponseModels:
+                      application/json: "Empty"
+                  ResponseParameters:
+                      method.response.header.Access-Control-Allow-Headers: false
+                      method.response.header.Access-Control-Allow-Methods: false
+                      method.response.header.Access-Control-Allow-Origin: false
 
-  OptionsMethodForUpdateTrackedTVShows:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      ResourceId: !Ref ApiGatewayUpdateTrackedTVShowResource
-      RestApiId: !Ref TVShowTrackerApiGateway
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+    OptionsMethodForUpdateUser:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ResourceId: !Ref ApiGatewayUpdateUserResource
+            RestApiId: !Ref TVShowTrackerApiGateway
+            HttpMethod: OPTIONS
+            Integration:
+                IntegrationResponses:
+                    - StatusCode: 200
+                      ResponseParameters:
+                          method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                          method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                          method.response.header.Access-Control-Allow-Origin: "'*'"
+                      ResponseTemplates:
+                          application/json: ""
+                PassthroughBehavior: WHEN_NO_MATCH
+                RequestTemplates:
+                    application/json: '{"statusCode": 200}'
+                Type: MOCK
+            MethodResponses:
+                - StatusCode: 200
+                  ResponseModels:
+                      application/json: "Empty"
+                  ResponseParameters:
+                      method.response.header.Access-Control-Allow-Headers: false
+                      method.response.header.Access-Control-Allow-Methods: false
+                      method.response.header.Access-Control-Allow-Origin: false
 
-  OptionsMethodForUpdateUser:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      ResourceId: !Ref ApiGatewayUpdateUserResource
-      RestApiId: !Ref TVShowTrackerApiGateway
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+    OptionsMethodForSearchTVShows:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            ResourceId: !Ref ApiGatewaySearchTVShowsResource
+            RestApiId: !Ref TVShowTrackerApiGateway
+            HttpMethod: OPTIONS
+            Integration:
+                IntegrationResponses:
+                    - StatusCode: 200
+                      ResponseParameters:
+                          method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                          method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                          method.response.header.Access-Control-Allow-Origin: "'*'"
+                      ResponseTemplates:
+                          application/json: ""
+                PassthroughBehavior: WHEN_NO_MATCH
+                RequestTemplates:
+                    application/json: '{"statusCode": 200}'
+                Type: MOCK
+            MethodResponses:
+                - StatusCode: 200
+                  ResponseModels:
+                      application/json: "Empty"
+                  ResponseParameters:
+                      method.response.header.Access-Control-Allow-Headers: false
+                      method.response.header.Access-Control-Allow-Methods: false
+                      method.response.header.Access-Control-Allow-Origin: false
 
-  OptionsMethodForSearchTVShows:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      ResourceId: !Ref ApiGatewaySearchTVShowsResource
-      RestApiId: !Ref TVShowTrackerApiGateway
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+    OptionsMethodForGetTrackedTVShows:
+        Type: AWS::ApiGateway::Method
+        Properties:
+            AuthorizationType: NONE
+            RestApiId: !Ref TVShowTrackerApiGateway
+            ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
+            HttpMethod: OPTIONS
+            Integration:
+                IntegrationResponses:
+                    - StatusCode: 200
+                      ResponseParameters:
+                          method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+                          method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
+                          method.response.header.Access-Control-Allow-Origin: "'*'"
+                      ResponseTemplates:
+                          application/json: ""
+                PassthroughBehavior: WHEN_NO_MATCH
+                RequestTemplates:
+                    application/json: '{"statusCode": 200}'
+                Type: MOCK
+            MethodResponses:
+                - StatusCode: 200
+                  ResponseModels:
+                      application/json: "Empty"
+                  ResponseParameters:
+                      method.response.header.Access-Control-Allow-Headers: false
+                      method.response.header.Access-Control-Allow-Methods: false
+                      method.response.header.Access-Control-Allow-Origin: false
 
-  OptionsMethodForGetTrackedTVShows:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      AuthorizationType: NONE
-      RestApiId: !Ref TVShowTrackerApiGateway
-      ResourceId: !Ref ApiGatewayGetTrackedTVShowsResource
-      HttpMethod: OPTIONS
-      Integration:
-        IntegrationResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-            method.response.header.Access-Control-Allow-Methods: "'POST,OPTIONS'"
-            method.response.header.Access-Control-Allow-Origin: "'*'"
-          ResponseTemplates:
-            application/json: ''
-        PassthroughBehavior: WHEN_NO_MATCH
-        RequestTemplates:
-          application/json: '{"statusCode": 200}'
-        Type: MOCK
-      MethodResponses:
-      - StatusCode: 200
-        ResponseModels:
-          application/json: 'Empty'
-        ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: false
-            method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+    ApiGatewayLoginResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: Login
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayLoginResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: Login
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayResetPasswordResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: ResetPassword
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayResetPasswordResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: ResetPassword
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayCreateAccountResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: CreateAccount
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayCreateAccountResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: CreateAccount
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayGetTrackedTVShowsResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: GetTrackedTVShows
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayGetTrackedTVShowsResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: GetTrackedTVShows
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayUpdateTrackedTVShowResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: UpdateTrackedTVShow
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayUpdateTrackedTVShowResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: UpdateTrackedTVShow
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewaySearchTVShowsResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: SearchTVShows
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewaySearchTVShowsResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: SearchTVShows
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayUpdateUserResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: UpdateUser
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  ApiGatewayUpdateUserResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: UpdateUser
-      RestApiId: !Ref TVShowTrackerApiGateway
+    HandleSESEmailBounceResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: HandleSESEmailBounce
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  HandleSESEmailBounceResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: HandleSESEmailBounce
-      RestApiId: !Ref TVShowTrackerApiGateway
+    HandleSESEmailComplaintResource:
+        Type: AWS::ApiGateway::Resource
+        Properties:
+            ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
+            PathPart: HandleSESEmailComplaint
+            RestApiId: !Ref TVShowTrackerApiGateway
 
-  HandleSESEmailComplaintResource:
-    Type: AWS::ApiGateway::Resource
-    Properties: 
-      ParentId: !GetAtt TVShowTrackerApiGateway.RootResourceId
-      PathPart: HandleSESEmailComplaint
-      RestApiId: !Ref TVShowTrackerApiGateway
+    ApiGatewayDeployment:
+        Type: AWS::ApiGateway::Deployment
+        DependsOn:
+            - ApiGatewayLoginMethod
+            - ApiGatewayResetPasswordMethod
+            - ApiGatewayCreateAccountMethod
+            - ApiGatewayUpdateUserMethod
+            - ApiGatewayGetTrackedTVShowsMethod
+            - ApiGatewayUpdateTrackedTVShowMethod
+            - ApiGatewaySearchTVShowsMethod
+            - ApiGatewayHandleSESEmailBounceMethod
+            - ApiGatewayHandleSESEmailComplaintMethod
+            - OptionsMethodForLogin
+            - OptionsMethodForResetPassword
+            - OptionsMethodForCreateAccount
+            - OptionsMethodForUpdateTrackedTVShows
+            - OptionsMethodForUpdateUser
+            - OptionsMethodForGetTrackedTVShows
+            - OptionsMethodForSearchTVShows
+        Properties:
+            RestApiId: !Ref TVShowTrackerApiGateway
+            StageName: !Ref ApiGatewayStageName
 
-  ApiGatewayDeployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn:
-      - ApiGatewayLoginMethod
-      - ApiGatewayResetPasswordMethod
-      - ApiGatewayCreateAccountMethod
-      - ApiGatewayUpdateUserMethod
-      - ApiGatewayGetTrackedTVShowsMethod
-      - ApiGatewayUpdateTrackedTVShowMethod
-      - ApiGatewaySearchTVShowsMethod
-      - ApiGatewayHandleSESEmailBounceMethod
-      - ApiGatewayHandleSESEmailComplaintMethod
-      - OptionsMethodForLogin
-      - OptionsMethodForResetPassword
-      - OptionsMethodForCreateAccount
-      - OptionsMethodForUpdateTrackedTVShows
-      - OptionsMethodForUpdateUser
-      - OptionsMethodForGetTrackedTVShows
-      - OptionsMethodForSearchTVShows
-    Properties:
-      RestApiId: !Ref TVShowTrackerApiGateway
-      StageName: !Ref ApiGatewayStageName
+    ## DYNAMO DB TABLES
+    UsersTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            TableName: !Ref UserTableName
+            ProvisionedThroughput:
+                ReadCapacityUnits: "5"
+                WriteCapacityUnits: "5"
+            AttributeDefinitions:
+                - AttributeName: "emailAddress"
+                  AttributeType: "S"
+            KeySchema:
+                - AttributeName: "emailAddress"
+                  KeyType: "HASH"
 
-  ## DYNAMO DB TABLES
-  UsersTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Ref UserTableName
-      ProvisionedThroughput: 
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      AttributeDefinitions:
-      - AttributeName: "emailAddress"
-        AttributeType: "S"
-      KeySchema:
-      - AttributeName: "emailAddress"
-        KeyType: "HASH"
+    TVShowsTable:
+        Type: AWS::DynamoDB::Table
+        Properties:
+            TableName: !Ref TvShowsTableName
+            ProvisionedThroughput:
+                ReadCapacityUnits: "5"
+                WriteCapacityUnits: "5"
+            AttributeDefinitions:
+                - AttributeName: "emailAddress"
+                  AttributeType: "S"
+            KeySchema:
+                - AttributeName: "emailAddress"
+                  KeyType: "HASH"
 
-  TVShowsTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: !Ref TvShowsTableName
-      ProvisionedThroughput: 
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      AttributeDefinitions:
-      - AttributeName: "emailAddress"
-        AttributeType: "S"
-      KeySchema:
-      - AttributeName: "emailAddress"
-        KeyType: "HASH"
+    ## MISCELLANEOUS
+    ScheduledRule:
+        Type: AWS::Events::Rule
+        Properties:
+            Description: "ScheduledRule"
+            ScheduleExpression: "rate(12 hours)"
+            State: "ENABLED"
+            Targets:
+                - Arn:
+                      Fn::GetAtt:
+                          - "EmailNotificationsLambda"
+                          - "Arn"
+                  Id: "TargetFunctionV1"
 
-  ## MISCELLANEOUS
-  ScheduledRule: 
-    Type: AWS::Events::Rule
-    Properties: 
-      Description: "ScheduledRule"
-      ScheduleExpression: "rate(12 hours)"
-      State: "ENABLED"
-      Targets: 
-        - 
-          Arn: 
-            Fn::GetAtt: 
-              - "EmailNotificationsLambda"
-              - "Arn"
-          Id: "TargetFunctionV1"
-  
-  PermissionForEventsToInvokeLambda: 
-    Type: AWS::Lambda::Permission
-    Properties: 
-      FunctionName: 
-        Ref: "EmailNotificationsLambda"
-      Action: "lambda:InvokeFunction"
-      Principal: "events.amazonaws.com"
-      SourceArn: 
-        Fn::GetAtt: 
-          - "ScheduledRule"
-          - "Arn"
+    PermissionForEventsToInvokeLambda:
+        Type: AWS::Lambda::Permission
+        Properties:
+            FunctionName:
+                Ref: "EmailNotificationsLambda"
+            Action: "lambda:InvokeFunction"
+            Principal: "events.amazonaws.com"
+            SourceArn:
+                Fn::GetAtt:
+                    - "ScheduledRule"
+                    - "Arn"
 
-  LambdaApiGatewayInvokeLogin:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt LoginLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/Login
+    LambdaApiGatewayInvokeLogin:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt LoginLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/Login
 
+    LambdaApiGatewayInvokeResetPassword:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt ResetPasswordLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/ResetPassword
 
-  LambdaApiGatewayInvokeResetPassword:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt ResetPasswordLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/ResetPassword
+    LambdaApiGatewayInvokeCreateAccount:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt AccountCreationLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/CreateAccount
 
-  LambdaApiGatewayInvokeCreateAccount:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt AccountCreationLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/CreateAccount
+    LambdaApiGatewayInvokeGetTrackedTVShows:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt GetTrackedTVShowsLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/GetTrackedTVShows
 
-  LambdaApiGatewayInvokeGetTrackedTVShows:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt GetTrackedTVShowsLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/GetTrackedTVShows
+    LambdaApiGatewayInvokeUpdateTrackedTVShow:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt UpdateTrackedTVShowLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateTrackedTVShow
 
-  LambdaApiGatewayInvokeUpdateTrackedTVShow:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt UpdateTrackedTVShowLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateTrackedTVShow
+    LambdaApiGatewayInvokeSearchTVShows:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt SearchTVShowsLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/SearchTVShows
 
-  LambdaApiGatewayInvokeSearchTVShows:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt SearchTVShowsLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/SearchTVShows
+    LambdaApiGatewayInvokeUpdateUser:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt UpdateUserRecordLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateUser
 
-  LambdaApiGatewayInvokeUpdateUser:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt UpdateUserRecordLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/UpdateUser
+    LambdaApiGatewayInvokeHandleSESEmailBounce:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt HandleSESEmailBounceLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/HandleSESEmailBounce
 
-  LambdaApiGatewayInvokeHandleSESEmailBounce:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt HandleSESEmailBounceLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/HandleSESEmailBounce
-
-  LambdaApiGatewayInvokeHandleSESEmailComplaint:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !GetAtt HandleSESEmailComplaintLambda.Arn
-      Principal: apigateway.amazonaws.com          
-      SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/HandleSESEmailComplaint
+    LambdaApiGatewayInvokeHandleSESEmailComplaint:
+        Type: AWS::Lambda::Permission
+        Properties:
+            Action: lambda:InvokeFunction
+            FunctionName: !GetAtt HandleSESEmailComplaintLambda.Arn
+            Principal: apigateway.amazonaws.com
+            SourceArn: !Sub arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${TVShowTrackerApiGateway}/*/*/HandleSESEmailComplaint
