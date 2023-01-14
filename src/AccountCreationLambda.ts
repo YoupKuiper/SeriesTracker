@@ -24,6 +24,7 @@ export const handler = async (event: any, context: any) => {
 			wantsEmailNotifications: true,
 			wantsMobileNotifications: true,
 			emailAddressVerified: false,
+			mobileRegistration: !!parsedEvent.mobile,
 		};
 
 		await new DynamoDBClient().createUserAccount(user);
@@ -33,7 +34,8 @@ export const handler = async (event: any, context: any) => {
 			.readFileSync(__dirname + "/user-registration-email-template.html")
 			.toString()
 			.replace(/{EMAILADDRESS}/g, encodeURIComponent(user.emailAddress))
-			.replace(/{VERIFYEMAILTOKEN}/g, encodeURIComponent(user.verifyEmailAddressToken));
+			.replace(/{VERIFYEMAILTOKEN}/g, encodeURIComponent(user.verifyEmailAddressToken))
+			.replace(/{MOBILEREGISTRATION}/g, encodeURIComponent(user.mobileRegistration));
 
 		console.log(`Email after replacements: ${htmlEmail}`);
 		if (!process.env.VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS) {
