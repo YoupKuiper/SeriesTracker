@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html style="background-color: #002937; color: white">
+<html style="background-color: #002937; color: white; text-align: center">
 	<head>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -10,7 +10,9 @@
 		<div style="width: 75%">
 			<h1>Please verify your email address to start using TV Tracker</h1>
 			<b>For Mobile:</b>
-			<p>Click <a href="tvtracker://verifyemailaddress/{EMAILADDRESS}/{VERIFYEMAILTOKEN}">here</a></p>
+			<form action="tvtracker://verifyemailaddress/{EMAILADDRESS}/{VERIFYEMAILTOKEN}" method="get">
+				<input type="submit" value="Verify your account" />
+			</form>
 			<b>For Web:</b>
 			<p>Click <a href="https://tvtracker.net/verifyemailaddress/{EMAILADDRESS}/{VERIFYEMAILTOKEN}">here</a></p>
 			<br />

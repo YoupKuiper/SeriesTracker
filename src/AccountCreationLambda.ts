@@ -32,8 +32,8 @@ export const handler = async (event: any, context: any) => {
 		const htmlEmail = fs
 			.readFileSync(__dirname + "/user-registration-email-template.html")
 			.toString()
-			.replace("{EMAILADDRESS}", encodeURIComponent(user.emailAddress))
-			.replace("{VERIFYEMAILTOKEN}", encodeURIComponent(user.verifyEmailAddressToken));
+			.replace(/{EMAILADDRESS}/g, encodeURIComponent(user.emailAddress))
+			.replace(/{VERIFYEMAILTOKEN}/g, encodeURIComponent(user.verifyEmailAddressToken));
 
 		console.log(`Email after replacements: ${htmlEmail}`);
 		if (!process.env.VERIFY_EMAIL_ADDRESS_FROM_EMAIL_ADDRESS) {
