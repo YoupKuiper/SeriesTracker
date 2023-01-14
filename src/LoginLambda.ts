@@ -1,7 +1,12 @@
 import aws from "aws-sdk";
 import { DynamoDBClient } from "./DynamoDBClient";
 import { isCorrectPassword } from "./lib/passwordHelper";
-import { sendErrorResponse, sendOKResponse, sendTokenErrorResponse } from "./lib/responseHelper";
+import {
+	sendErrorResponse,
+	sendOKResponse,
+	sendTokenErrorResponse,
+	sendVerifyEmailFirstResponse,
+} from "./lib/responseHelper";
 import { isValid, signTokenFor } from "./lib/tokenHelper";
 const dynamoDB = new aws.DynamoDB({ region: process.env.AWS_REGION });
 
@@ -49,6 +54,9 @@ export const handler = async (event: any, context: any) => {
 
 		// Check if password is correct
 		if (await isCorrectPassword(password, hashedPassword)) {
+			if (!user.emailAddressVerified) {
+				return sendVerifyEmailFirstResponse();
+			}
 			// Endcode a JWT token and return
 			if (process.env.JWT_SECRET) {
 				const token = signTokenFor(
@@ -57,8 +65,13 @@ export const handler = async (event: any, context: any) => {
 					user.wantsMobileNotifications
 				);
 
+				const userReturnObject = {
+					emailAddress: user.emailAddress,
+					wantsEmailNotifications: user.wantsEmailNotifications,
+					wantsMobileNotifications: user.wantsMobileNotifications,
+				};
 				console.log(`Login successful`);
-				return sendOKResponse({ token, user });
+				return sendOKResponse({ token, userReturnObject });
 			}
 			throw new Error(`Environment variable for JWT secret required`);
 		}
