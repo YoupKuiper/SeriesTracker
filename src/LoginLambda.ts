@@ -68,13 +68,13 @@ export const handler = async (event: any, context: any) => {
 					user.wantsMobileNotifications
 				);
 
-				const userReturnObject = {
+				console.log(`Login successful`);
+				return sendOKResponse({
+					token,
 					emailAddress: user.emailAddress,
 					wantsEmailNotifications: user.wantsEmailNotifications,
 					wantsMobileNotifications: user.wantsMobileNotifications,
-				};
-				console.log(`Login successful`);
-				return sendOKResponse({ token, userReturnObject });
+				});
 			}
 			throw new Error(`Environment variable for JWT secret required`);
 		}
