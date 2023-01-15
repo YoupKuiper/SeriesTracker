@@ -3,31 +3,32 @@ import { createDynamoDBUpdateParams } from "./lib/updateRecordHelper";
 import { DynamoDBClient } from "./DynamoDBClient";
 
 export const handler = async (event: any, context: any) => {
-    console.log(`Incoming event body: ${JSON.stringify(event.body)}`)
+	console.log(`Incoming event body: ${JSON.stringify(event.body)}`);
 
-    const parsedEvent = JSON.parse(event.body);
-    console.log(`Parsed event body: ${JSON.stringify(parsedEvent)}`);
-    
-    try {
-        const parsedMessage = JSON.parse(parsedEvent.Message)
-        const dynamoDBClient = new DynamoDBClient()
-        console.log(parsedMessage)
-        const recipients = parsedMessage.mail.destination
-        let promises: Promise<any>[] = []
+	const parsedEvent = JSON.parse(event.body);
+	console.log(`Parsed event body: ${JSON.stringify(parsedEvent)}`);
 
-        for (const recipient of recipients) {    
-            const params = createDynamoDBUpdateParams({
-                wantsEmailNotifications: false
-            }, recipient)
-            promises.push(dynamoDBClient.updateUser(params))
-        }
+	try {
+		const parsedMessage = JSON.parse(parsedEvent.Message);
+		const dynamoDBClient = new DynamoDBClient();
+		console.log(parsedMessage);
+		const recipients = parsedMessage.mail.destination;
+		let promises: Promise<any>[] = [];
 
-        await Promise.allSettled(promises);
+		for (const recipient of recipients) {
+			const params = createDynamoDBUpdateParams(
+				{
+					wantsEmailNotifications: false,
+				},
+				recipient
+			);
+			promises.push(dynamoDBClient.updateUser(params));
+		}
 
-    } catch (error) {
-        console.log(error)
-    }
+		await Promise.allSettled(promises);
+	} catch (error) {
+		console.log(error);
+	}
 
-    return sendOKResponse('Done!')
-}
-
+	return sendOKResponse({ message: "Done!" });
+};

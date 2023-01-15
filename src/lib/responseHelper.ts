@@ -34,7 +34,7 @@ export const sendVerifyEmailFirstResponse = () => {
 			"Access-Control-Allow-Origin": "*",
 			"Access-Control-Allow-Methods": "OPTIONS,POST,GET",
 		},
-		body: JSON.stringify("Please verify your account before logging in"),
+		body: JSON.stringify({ message: "Please verify your account before logging in" }),
 	};
 	console.log(`Returning: ${JSON.stringify(returnObject)}`);
 	return returnObject;

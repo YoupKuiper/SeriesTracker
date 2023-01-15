@@ -31,7 +31,7 @@ export const handler = async (event: any, context: any) => {
 				"unsubscribeEmailToken"
 			);
 			await dynamoDBClient.updateUser(params);
-			return sendOKResponse("Great success!");
+			return sendOKResponse({ message: "Great success!" });
 		}
 
 		if (isResetPasswordRequest) {
@@ -47,7 +47,9 @@ export const handler = async (event: any, context: any) => {
 				"resetPasswordToken"
 			);
 			await dynamoDBClient.updateUser(params);
-			return sendOKResponse("Password successfully changed, you can now log in with your new password");
+			return sendOKResponse({
+				message: "Password successfully changed, you can now log in with your new password",
+			});
 		}
 
 		if (isVerifyEmailAddressRequest) {
@@ -63,7 +65,7 @@ export const handler = async (event: any, context: any) => {
 				"verifyEmailAddressToken"
 			);
 			await dynamoDBClient.updateUser(params);
-			return sendOKResponse("Great success!");
+			return sendOKResponse({ message: "Great success!" });
 		}
 
 		// Check if token is valid
@@ -72,7 +74,7 @@ export const handler = async (event: any, context: any) => {
 		const params = createDynamoDBUpdateParams(parsedEvent.updateObject, decodedToken["data"]["emailAddress"]);
 		const updatedUser = await dynamoDBClient.updateUser(params);
 		if (!updatedUser) {
-			return sendErrorResponse("Failed to update user data");
+			return sendErrorResponse({ message: "Failed to update user data" });
 		}
 		// Return user without sensitive data
 		const {
@@ -87,6 +89,6 @@ export const handler = async (event: any, context: any) => {
 		return sendOKResponse(userWithoutPassword);
 	} catch (error) {
 		console.error(error);
-		return sendErrorResponse("Failed to update user data");
+		return sendErrorResponse({ message: "Failed to update user data" });
 	}
 };

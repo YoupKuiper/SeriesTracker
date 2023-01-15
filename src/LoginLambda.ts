@@ -46,7 +46,7 @@ export const handler = async (event: any, context: any) => {
 
 		if (!userDto.Item) {
 			console.log(`Invalid credentials`);
-			return sendErrorResponse("Invalid credentials");
+			return sendErrorResponse({ message: "Invalid credentials" });
 		}
 
 		const { hashedPassword, unsubscribeEmailToken, resetPasswordToken, ...user } =
@@ -77,9 +77,9 @@ export const handler = async (event: any, context: any) => {
 		}
 
 		console.log(`Invalid credentials`);
-		return sendErrorResponse("Invalid credentials");
+		return sendErrorResponse({ message: "Invalid credentials" });
 	} catch (error) {
 		console.error(error);
-		return sendErrorResponse("Failed to log in user");
+		return sendErrorResponse({ message: "Failed to log in user" });
 	}
 };

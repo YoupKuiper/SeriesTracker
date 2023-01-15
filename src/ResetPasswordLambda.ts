@@ -19,7 +19,9 @@ export const handler = async (event: any, context: any) => {
 		// Check if email address exists
 		const user = await new DynamoDBClient().getUserByEmailAddress(emailAddress);
 		if (!user) {
-			return sendOKResponse("An email with a reset password link has been sent to your email address");
+			return sendOKResponse({
+				message: "An email with a reset password link has been sent to your email address",
+			});
 		}
 		// Create html email content
 		const htmlEmail = fs
@@ -40,9 +42,9 @@ export const handler = async (event: any, context: any) => {
 			htmlEmail,
 			""
 		);
-		return sendOKResponse("An email with a reset password link has been sent to your email address");
+		return sendOKResponse({ message: "An email with a reset password link has been sent to your email address" });
 	} catch (error) {
 		console.error(error);
-		return sendErrorResponse("Failed log in user");
+		return sendErrorResponse({ message: "Failed log in user" });
 	}
 };

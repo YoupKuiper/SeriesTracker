@@ -49,9 +49,9 @@ export const handler = async (event: any, context: any) => {
 			""
 		);
 
-		return sendOKResponse("Account created");
+		return sendOKResponse({ message: "Account created" });
 	} catch (error) {
 		console.error(error);
-		return sendErrorResponse("Account creation failed");
+		return sendErrorResponse({ message: "Account creation failed" });
 	}
 };

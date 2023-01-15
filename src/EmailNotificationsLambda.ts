@@ -83,10 +83,10 @@ export const handler = async (event: any, context: any) => {
 
 		await Promise.allSettled(promises);
 
-		return sendOKResponse("Notifications sent successfully");
+		return sendOKResponse({ message: "Notifications sent successfully" });
 	} catch (error) {
 		console.error(error);
-		return sendErrorResponse("Failed to send email");
+		return sendErrorResponse({ message: "Failed to send email" });
 	}
 };
 
@@ -123,7 +123,7 @@ const sendEmailNotificationTo = async (
 ) => {
 	if (!process.env.FROM_EMAIL_ADDRESS) {
 		console.error("From email address was not set");
-		return sendErrorResponse("From email address was not set");
+		return sendErrorResponse({ message: "From email address was not set" });
 	}
 
 	const htmlEmail = fs
