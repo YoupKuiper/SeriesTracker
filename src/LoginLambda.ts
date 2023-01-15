@@ -23,6 +23,9 @@ export const handler = async (event: any, context: any) => {
 			const decodedToken = isValid(parsedEvent.token);
 			const emailAddress = decodedToken["data"]["emailAddress"];
 			const userDto = await new DynamoDBClient().getUserByEmailAddress(emailAddress);
+			if (!userDto) {
+				return sendErrorResponse({ message: "User not found" });
+			}
 			const { wantsEmailNotifications, wantsMobileNotifications } = userDto;
 			return sendOKResponse({
 				emailAddress,
