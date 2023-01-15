@@ -20,7 +20,7 @@ export const handler = async (event: any, context: any) => {
 
 		const user = await new DynamoDBClient().getUserByEmailAddress(decodedToken.data.emailAddress);
 
-		if (!user.trackedTVShows) {
+		if (!user || !user.trackedTVShows) {
 			console.log(`No tv shows found, returning: []}`);
 			// No TV shows found, return empty list
 			return sendOKResponse([]);
