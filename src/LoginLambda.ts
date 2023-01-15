@@ -80,6 +80,6 @@ export const handler = async (event: any, context: any) => {
 		return sendErrorResponse("Invalid credentials");
 	} catch (error) {
 		console.error(error);
-		return sendErrorResponse("Failed log in user");
+		return sendErrorResponse("Failed to log in user");
 	}
 };
