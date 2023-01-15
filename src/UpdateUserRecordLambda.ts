@@ -47,7 +47,7 @@ export const handler = async (event: any, context: any) => {
 				"resetPasswordToken"
 			);
 			await dynamoDBClient.updateUser(params);
-			return sendOKResponse("Great success!");
+			return sendOKResponse("Password successfully changed, you can now log in with your new password");
 		}
 
 		if (isVerifyEmailAddressRequest) {
