@@ -25,5 +25,5 @@ export const isValid = (token: string): any => {
 
 export const createRandomString = (): any => {
 	const RANDOM_STRING_SIZE = 21;
-	return Crypto.randomBytes(RANDOM_STRING_SIZE).toString("base64").slice(0, RANDOM_STRING_SIZE);
+	return Crypto.randomBytes(RANDOM_STRING_SIZE).toString("hex").slice(0, RANDOM_STRING_SIZE);
 };
