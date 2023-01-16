@@ -43,7 +43,7 @@ export const handler = async (event: any, context: any) => {
 
 		await Promise.allSettled(promises);
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 	}
 
 	return sendOKResponse({ message: "Done!" });

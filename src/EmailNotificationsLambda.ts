@@ -164,8 +164,8 @@ const sendMobileNotificationTo = async (emailAddress, userDeviceToken, trackedTV
 			}
 		);
 	} catch (error) {
-		console.log(`Failed to send mobile notification to user ${emailAddress} with token: ${userDeviceToken}`);
-		console.log(error);
+		console.error(`Failed to send mobile notification to user ${emailAddress} with token: ${userDeviceToken}`);
+		console.error(error);
 	}
 };
 
