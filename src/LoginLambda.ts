@@ -41,7 +41,7 @@ export const handler = async (event: any, context: any) => {
 			if (!clientId) {
 				throw "FIREBASE CLIENT ID ENV VAR NOT PRESENT";
 			}
-			const client = new OAuth2Client(CLIENT_ID);
+			const client = new OAuth2Client(clientId);
 			async function verify() {
 				const ticket = await client.verifyIdToken({
 					idToken: parsedEvent.googleIdToken,
