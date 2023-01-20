@@ -19,7 +19,9 @@ export const handler = async (event: any, context: any) => {
 
 	try {
 		const isLoginWithTokenRequest = !!parsedEvent.token;
+		console.log(parsedEvent.googleIdToken);
 		const isLoginWithGoogleRequest = !!parsedEvent.googleIdToken;
+		console.log(isLoginWithGoogleRequest);
 		if (isLoginWithTokenRequest) {
 			// Check if valid token
 			const decodedToken = isValid(parsedEvent.token);
