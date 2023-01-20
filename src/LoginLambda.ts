@@ -61,7 +61,17 @@ export const handler = async (event: any, context: any) => {
 
 			const user = await dynamoClient.getUserByEmailAddress(emailAddress);
 			if (user) {
-				return sendOKResponse(user);
+				const token = signTokenFor(
+					user.emailAddress,
+					user.wantsEmailNotifications,
+					user.wantsMobileNotifications
+				);
+				return sendOKResponse({
+					token,
+					emailAddress: emailAddress,
+					wantsEmailNotifications: true,
+					wantsMobileNotifications: true,
+				});
 			}
 
 			// Create user and return fresh one
