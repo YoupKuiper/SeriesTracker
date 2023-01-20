@@ -75,7 +75,7 @@ export const handler = async (event: any, context: any) => {
 			}
 
 			// Create user and return fresh one
-			await dynamoClient.createUserAccount(emailAddress);
+			await dynamoClient.createUserAccount(emailAddress, null, false, true);
 			const token = signTokenFor(emailAddress, true, true);
 
 			console.log(`Login successful`);

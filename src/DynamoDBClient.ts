@@ -7,7 +7,7 @@ const ALREADY_SENT_NOTIFICATIONS_RECORD_ID = "ALREADY_SENT_NOTIFICATIONS_RECORD"
 const DEFAULT_PASSWORD = "DEFAULT_VALUE_FOR_PASSWORD";
 
 export class DynamoDBClient {
-	createUserAccount = async (emailAddress, password = null, mobile = false) => {
+	createUserAccount = async (emailAddress, password = null, mobile = false, isOauth = false) => {
 		const passwordToSave = !!password ? await createPasswordHash(password) : DEFAULT_PASSWORD;
 		const user = {
 			emailAddress: emailAddress.toLowerCase(),
@@ -17,7 +17,7 @@ export class DynamoDBClient {
 			verifyEmailAddressToken: createRandomString(),
 			wantsEmailNotifications: true,
 			wantsMobileNotifications: true,
-			emailAddressVerified: false,
+			emailAddressVerified: isOauth,
 			mobileRegistration: !!mobile,
 		};
 
