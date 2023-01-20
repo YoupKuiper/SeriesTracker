@@ -22,12 +22,14 @@ export const handler = async (event: any, context: any) => {
 		console.log(parsedEvent.googleIdToken);
 		const isLoginWithGoogleRequest = !!parsedEvent.googleIdToken;
 		console.log(isLoginWithGoogleRequest);
+		const dynamoClient = new DynamoDBClient();
 		if (isLoginWithTokenRequest) {
 			// Check if valid token
 			const decodedToken = isValid(parsedEvent.token);
 			const emailAddress = decodedToken["data"]["emailAddress"];
-			const userDto = await new DynamoDBClient().getUserByEmailAddress(emailAddress);
+			const userDto = await dynamoClient.getUserByEmailAddress(emailAddress);
 			if (!userDto) {
+				console.error(`User for ${emailAddress} not found`);
 				return sendErrorResponse({ message: "User not found" });
 			}
 			const { wantsEmailNotifications, wantsMobileNotifications } = userDto;
@@ -44,22 +46,35 @@ export const handler = async (event: any, context: any) => {
 				throw "FIREBASE CLIENT ID ENV VAR NOT PRESENT";
 			}
 			const client = new OAuth2Client(clientId);
-			async function verify() {
-				const ticket = await client.verifyIdToken({
-					idToken: parsedEvent.googleIdToken,
-					audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
-					// Or, if multiple clients access the backend:
-					//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
-				});
-				const payload = ticket.getPayload();
-				console.log(payload);
-
-				return sendOKResponse(payload);
-				// const userid = payload["sub"];
-				// If request specified a G Suite domain:
-				// const domain = payload['hd'];
+			const ticket = await client.verifyIdToken({
+				idToken: parsedEvent.googleIdToken,
+				audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
+				// Or, if multiple clients access the backend:
+				//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+			});
+			const payload = ticket.getPayload();
+			if (!payload || !payload.email) {
+				console.error("Failed to verify google id token");
+				return sendErrorResponse({ message: "Failed to verify google id token" });
 			}
-			verify().catch(console.error);
+			const emailAddress = payload.email;
+
+			const user = await dynamoClient.getUserByEmailAddress(emailAddress);
+			if (user) {
+				return sendOKResponse(user);
+			}
+
+			// Create user and return fresh one
+			await dynamoClient.createUserAccount(emailAddress);
+			const token = signTokenFor(emailAddress, true, true);
+
+			console.log(`Login successful`);
+			return sendOKResponse({
+				token,
+				emailAddress: emailAddress,
+				wantsEmailNotifications: true,
+				wantsMobileNotifications: true,
+			});
 		}
 
 		const { password, emailAddress } = parsedEvent;
@@ -89,21 +104,16 @@ export const handler = async (event: any, context: any) => {
 				return sendVerifyEmailFirstResponse();
 			}
 			// Endcode a JWT token and return
-			if (process.env.JWT_SECRET) {
-				const token = signTokenFor(
-					user.emailAddress,
-					user.wantsEmailNotifications,
-					user.wantsMobileNotifications
-				);
+			const token = signTokenFor(user.emailAddress, user.wantsEmailNotifications, user.wantsMobileNotifications);
 
-				console.log(`Login successful`);
-				return sendOKResponse({
-					token,
-					emailAddress: user.emailAddress,
-					wantsEmailNotifications: user.wantsEmailNotifications,
-					wantsMobileNotifications: user.wantsMobileNotifications,
-				});
-			}
+			console.log(`Login successful`);
+			return sendOKResponse({
+				token,
+				emailAddress: user.emailAddress,
+				wantsEmailNotifications: user.wantsEmailNotifications,
+				wantsMobileNotifications: user.wantsMobileNotifications,
+			});
+
 			throw new Error(`Environment variable for JWT secret required`);
 		}
 

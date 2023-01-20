@@ -1,10 +1,26 @@
 import aws from "aws-sdk";
+import { createPasswordHash } from "./lib/passwordHelper";
+import { createRandomString } from "./lib/tokenHelper";
 const docClient = new aws.DynamoDB.DocumentClient({ region: process.env.AWS_REGION, apiVersion: "2012-08-10" });
 
 const ALREADY_SENT_NOTIFICATIONS_RECORD_ID = "ALREADY_SENT_NOTIFICATIONS_RECORD";
+const DEFAULT_PASSWORD = "DEFAULT_VALUE_FOR_PASSWORD";
 
 export class DynamoDBClient {
-	createUserAccount = async (user) => {
+	createUserAccount = async (emailAddress, password = null, mobile = false) => {
+		const passwordToSave = !!password ? await createPasswordHash(password) : DEFAULT_PASSWORD;
+		const user = {
+			emailAddress: emailAddress.toLowerCase(),
+			hashedPassword: passwordToSave,
+			unsubscribeEmailToken: createRandomString(),
+			resetPasswordToken: createRandomString(),
+			verifyEmailAddressToken: createRandomString(),
+			wantsEmailNotifications: true,
+			wantsMobileNotifications: true,
+			emailAddressVerified: false,
+			mobileRegistration: !!mobile,
+		};
+
 		await docClient
 			.put({
 				Item: user,
@@ -12,6 +28,7 @@ export class DynamoDBClient {
 				ConditionExpression: "attribute_not_exists(emailAddress)",
 			})
 			.promise();
+		return user;
 	};
 
 	updateUser = async (updateParams) => {

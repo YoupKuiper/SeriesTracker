@@ -14,20 +14,11 @@ export const handler = async (event: any, context: any) => {
 	console.log(`Parsed event body: ${JSON.stringify(parsedEvent)}`);
 
 	try {
-		// Create hash from password
-		const user = {
-			emailAddress: parsedEvent.emailAddress.toLowerCase(),
-			hashedPassword: await createPasswordHash(parsedEvent.password),
-			unsubscribeEmailToken: createRandomString(),
-			resetPasswordToken: createRandomString(),
-			verifyEmailAddressToken: createRandomString(),
-			wantsEmailNotifications: true,
-			wantsMobileNotifications: true,
-			emailAddressVerified: false,
-			mobileRegistration: !!parsedEvent.mobile,
-		};
-
-		await new DynamoDBClient().createUserAccount(user);
+		const user = await new DynamoDBClient().createUserAccount(
+			parsedEvent.emailAddress,
+			parsedEvent.password,
+			parsedEvent.mobile
+		);
 
 		// Send verification email
 		const htmlEmail = fs
