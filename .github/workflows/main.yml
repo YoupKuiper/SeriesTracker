@@ -61,4 +61,5 @@ jobs:
                       UserTableName=${{ env.USER_TABLE_NAME }},
                       TvShowsTableName=${{ env.TV_SHOWS_TABLE_NAME }},
                       JWTSecret=${{ secrets.JWT_SECRET }},
-                      APIGatewayName=${{ env.API_GATEWAY_NAME }}
+                      APIGatewayName=${{ env.API_GATEWAY_NAME }},
+                      FirebaseGoogleOauthClientId=${{ secrets.FIREBASE_GOOGLE_OAUTH_CLIENT_ID }}

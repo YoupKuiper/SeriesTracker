@@ -22,6 +22,9 @@ Parameters:
     FirebaseNotificationKeyAndroid:
         Type: String
         Description: API Key to send notifications to Android app
+    FirebaseGoogleOauthClientId:
+        Type: String
+        Description: OAuth client id used to verify logins
     UserTableName:
         Type: String
         Description: Name of DynamoDB table that holds user data
@@ -233,6 +236,7 @@ Resources:
                     USER_TABLE_NAME: !Ref UserTableName
                     TV_SHOWS_TABLE_NAME: !Ref TvShowsTableName
                     JWT_SECRET: !Ref JWTSecret
+                    FIREBASE_GOOGLE_OAUTH_CLIENT_ID: !Ref FirebaseGoogleOauthClientId
             Handler: LoginLambda.handler
             MemorySize: 128
             Timeout: 10

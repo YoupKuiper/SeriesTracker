@@ -1,6 +1,7 @@
 import aws from "aws-sdk";
 import { DynamoDBClient } from "./DynamoDBClient";
 import { isCorrectPassword } from "./lib/passwordHelper";
+import { OAuth2Client } from "google-auth-library";
 import {
 	sendErrorResponse,
 	sendOKResponse,
@@ -18,6 +19,7 @@ export const handler = async (event: any, context: any) => {
 
 	try {
 		const isLoginWithTokenRequest = !!parsedEvent.token;
+		const isLoginWithGoogleRequest = !!parsedEvent.googleIdToken;
 		if (isLoginWithTokenRequest) {
 			// Check if valid token
 			const decodedToken = isValid(parsedEvent.token);
@@ -32,6 +34,30 @@ export const handler = async (event: any, context: any) => {
 				wantsEmailNotifications,
 				wantsMobileNotifications,
 			});
+		}
+
+		if (isLoginWithGoogleRequest) {
+			const clientId = process.env.FIREBASE_GOOGLE_OAUTH_CLIENT_ID;
+			if (!clientId) {
+				throw "FIREBASE CLIENT ID ENV VAR NOT PRESENT";
+			}
+			const client = new OAuth2Client(CLIENT_ID);
+			async function verify() {
+				const ticket = await client.verifyIdToken({
+					idToken: parsedEvent.googleIdToken,
+					audience: clientId, // Specify the CLIENT_ID of the app that accesses the backend
+					// Or, if multiple clients access the backend:
+					//[CLIENT_ID_1, CLIENT_ID_2, CLIENT_ID_3]
+				});
+				const payload = ticket.getPayload();
+				console.log(payload);
+
+				return sendOKResponse(payload);
+				// const userid = payload["sub"];
+				// If request specified a G Suite domain:
+				// const domain = payload['hd'];
+			}
+			verify().catch(console.error);
 		}
 
 		const { password, emailAddress } = parsedEvent;
